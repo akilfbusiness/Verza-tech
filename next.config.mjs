@@ -12,8 +12,6 @@ const nextConfig = {
       },
     ],
   },
-  // Enable React Compiler (Next.js 16)
-  reactCompiler: true,
   // Enable Cache Components (Next.js 16)
   cacheComponents: true,
 }
