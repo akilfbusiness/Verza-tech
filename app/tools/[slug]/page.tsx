@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { getToolBySlug, getAllToolSlugs, getFAQsByTool } from '@/lib/sanity.queries'
+import { getToolBySlug, getAllToolSlugs, getFAQsByTool, getAllTools } from '@/lib/sanity.queries'
 import { Breadcrumb } from '@/components/breadcrumb'
 import {
   generateSoftwareApplicationSchema,
@@ -13,6 +13,7 @@ import { QuickAnswer } from '@/components/aeo/quick-answer'
 import { KeyFacts } from '@/components/aeo/key-facts'
 import { BestFor } from '@/components/aeo/best-for'
 import { UpdatedBadge } from '@/components/aeo/updated-badge'
+import { RelatedTools } from '@/components/features/related-tools'
 
 type Props = {
   params: Promise<{ slug: string }>
@@ -94,9 +95,10 @@ export const fetchCache = 'default-cache' // Cache fetch requests
 
 export default async function ToolPage({ params }: Props) {
   const { slug } = await params
-  const [tool, faqs] = await Promise.all([
+  const [tool, faqs, allTools] = await Promise.all([
     getToolBySlug(slug),
     getToolBySlug(slug).then(t => t ? getFAQsByTool(t._id) : []),
+    getAllTools(),
   ])
 
   if (!tool) {
@@ -390,6 +392,9 @@ export default async function ToolPage({ params }: Props) {
               </div>
             </section>
           )}
+
+          {/* Related Tools */}
+          <RelatedTools currentTool={tool} allTools={allTools} maxResults={4} />
         </div>
       </div>
       </div>
