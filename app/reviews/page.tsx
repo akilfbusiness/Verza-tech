@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description: 'Expert reviews of SaaS and AI tools. Get in-depth analysis, ratings, and recommendations from our team.',
 }
 
-export const revalidate = 3600
+export const revalidate = 60 // Revalidate every minute
 
 export default async function ReviewsPage() {
   const reviews = await getAllReviews()

@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description: 'Browse our complete directory of SaaS and AI tools with reviews, pricing, and comparisons. Filter by category, pricing, and rating.',
 }
 
-export const revalidate = 3600
+export const revalidate = 60 // Revalidate every minute
 
 export default async function ToolsPage() {
   const [tools, categories] = await Promise.all([

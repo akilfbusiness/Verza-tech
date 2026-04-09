@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export const revalidate = 3600
+export const revalidate = 60 // Revalidate every minute
 
 export default async function CategoryPage({ params }: Props) {
   const { slug } = await params

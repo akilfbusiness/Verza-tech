@@ -8,7 +8,7 @@ import {
   renderJsonLd,
 } from '@/lib/schema'
 
-export const revalidate = 3600 // Revalidate every hour
+export const revalidate = 60 // Revalidate every minute for near-instant updates
 
 export default async function HomePage() {
   if (!isSanityConfigured) {
