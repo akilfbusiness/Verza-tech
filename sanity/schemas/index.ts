@@ -27,12 +27,12 @@
  * })
  */
 
-export { toolSchema } from './tool.schema'
-export { categorySchema } from './category.schema'
-export { authorSchema } from './author.schema'
-export { reviewSchema } from './review.schema'
-export { faqSchema } from './faq.schema'
-export { comparisonSchema } from './comparison.schema'
+import { toolSchema } from './tool.schema'
+import { categorySchema } from './category.schema'
+import { authorSchema } from './author.schema'
+import { reviewSchema } from './review.schema'
+import { faqSchema } from './faq.schema'
+import { comparisonSchema } from './comparison.schema'
 
 export const schemaTypes = [
   toolSchema,
