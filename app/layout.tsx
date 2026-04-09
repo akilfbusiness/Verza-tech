@@ -1,16 +1,16 @@
 import type { Metadata, Viewport } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
+import { Inter, JetBrains_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { generateOrganizationSchema, generateWebsiteSchema, renderJsonLd } from '@/lib/schema'
 import './globals.css'
 
-const geist = Geist({ 
+const inter = Inter({ 
   subsets: ['latin'],
   variable: '--font-sans',
   display: 'swap',
 })
 
-const geistMono = Geist_Mono({ 
+const jetbrainsMono = JetBrains_Mono({ 
   subsets: ['latin'],
   variable: '--font-mono',
   display: 'swap',
@@ -114,7 +114,7 @@ export default function RootLayout({
   const websiteSchema = generateWebsiteSchema()
 
   return (
-    <html lang="en-AU" className={`${geist.variable} ${geistMono.variable}`}>
+    <html lang="en-AU" className={`${inter.variable} ${jetbrainsMono.variable}`}>
       <head>
         {renderJsonLd(organizationSchema)}
         {renderJsonLd(websiteSchema)}
