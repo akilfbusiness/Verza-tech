@@ -37,11 +37,14 @@ export function validateSanityConfig() {
   const missing = required.filter(key => !process.env[key])
   
   if (missing.length > 0) {
-    console.warn(
-      '[Sanity] Missing required environment variables:',
-      missing.join(', ')
-    )
-    console.warn('[Sanity] Please check your .env.local file')
+    // Only warn in development, don't throw errors
+    if (process.env.NODE_ENV === 'development') {
+      console.warn(
+        '[Sanity] Missing environment variables:',
+        missing.join(', ')
+      )
+      console.warn('[Sanity] Add them to .env.local to enable CMS features')
+    }
     return false
   }
   
