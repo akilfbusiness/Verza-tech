@@ -9,6 +9,10 @@ import {
   generateFAQPageSchema,
   renderJsonLd,
 } from '@/lib/schema'
+import { QuickAnswer } from '@/components/aeo/quick-answer'
+import { KeyFacts } from '@/components/aeo/key-facts'
+import { BestFor } from '@/components/aeo/best-for'
+import { UpdatedBadge } from '@/components/aeo/updated-badge'
 
 type Props = {
   params: Promise<{ slug: string }>
@@ -188,38 +192,56 @@ export default async function ToolPage({ params }: Props) {
 
       <div className="container mx-auto px-4 py-12 max-w-4xl">
         <div className="space-y-12">
-          {/* Description */}
+          {/* Quick Answer for AI Engines */}
           {tool.description && (
-            <section>
-              <h2 className="text-2xl font-bold mb-4">About {tool.name}</h2>
-              <p className="text-muted-foreground leading-relaxed">{tool.description}</p>
-            </section>
+            <QuickAnswer
+              question={`What is ${tool.name}?`}
+              answer={tool.description}
+              highlights={tool.features?.slice(0, 3)}
+            />
           )}
 
-          {/* Quick Facts */}
-          <section className="border rounded-lg p-6 bg-muted/30">
-            <h3 className="font-semibold mb-4">Quick Facts</h3>
-            <dl className="grid grid-cols-2 gap-4">
-              {tool.freePlanAvailable !== undefined && (
-                <>
-                  <dt className="text-sm text-muted-foreground">Free Plan</dt>
-                  <dd className="text-sm font-medium">{tool.freePlanAvailable ? 'Yes' : 'No'}</dd>
-                </>
-              )}
-              {tool.freeTrialAvailable !== undefined && (
-                <>
-                  <dt className="text-sm text-muted-foreground">Free Trial</dt>
-                  <dd className="text-sm font-medium">{tool.freeTrialAvailable ? 'Yes' : 'No'}</dd>
-                </>
-              )}
-              {tool.status && (
-                <>
-                  <dt className="text-sm text-muted-foreground">Status</dt>
-                  <dd className="text-sm font-medium capitalize">{tool.status}</dd>
-                </>
-              )}
-            </dl>
-          </section>
+          {/* Updated Badge */}
+          {(tool.publishedAt || tool.updatedAt) && (
+            <UpdatedBadge
+              publishedAt={tool.publishedAt}
+              updatedAt={tool.updatedAt}
+              format="long"
+            />
+          )}
+
+          {/* Quick Facts - AI-Optimized */}
+          <KeyFacts
+            title="Quick Facts"
+            columns={2}
+            facts={[
+              ...(tool.freePlanAvailable !== undefined ? [{ 
+                label: 'Free Plan Available', 
+                value: tool.freePlanAvailable,
+                icon: '💰'
+              }] : []),
+              ...(tool.freeTrialAvailable !== undefined ? [{ 
+                label: 'Free Trial', 
+                value: tool.freeTrialAvailable,
+                icon: '🎁'
+              }] : []),
+              ...(tool.status ? [{ 
+                label: 'Status', 
+                value: tool.status,
+                icon: '📊'
+              }] : []),
+              ...(tool.rating ? [{ 
+                label: 'Rating', 
+                value: `${tool.rating}/5`,
+                icon: '⭐'
+              }] : []),
+              ...(tool.website ? [{ 
+                label: 'Website', 
+                value: new URL(tool.website).hostname,
+                icon: '🌐'
+              }] : []),
+            ]}
+          />
 
           {/* Features */}
           {tool.features && tool.features.length > 0 && (
@@ -305,19 +327,12 @@ export default async function ToolPage({ params }: Props) {
             </section>
           )}
 
-          {/* Best For */}
+          {/* Best For - AI-Optimized */}
           {tool.bestFor && tool.bestFor.length > 0 && (
-            <section>
-              <h2 className="text-2xl font-bold mb-4">Best For</h2>
-              <ul className="space-y-2">
-                {tool.bestFor.map((use, index) => (
-                  <li key={index} className="flex items-start gap-2">
-                    <span className="text-primary mt-1">→</span>
-                    <span className="text-muted-foreground">{use}</span>
-                  </li>
-                ))}
-              </ul>
-            </section>
+            <BestFor
+              title={`Best For`}
+              useCases={tool.bestFor}
+            />
           )}
 
           {/* FAQs */}

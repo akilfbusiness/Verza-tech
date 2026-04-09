@@ -9,6 +9,8 @@ import {
   generateBreadcrumbSchema,
   renderJsonLd,
 } from '@/lib/schema'
+import { Verdict } from '@/components/aeo/verdict'
+import { UpdatedBadge } from '@/components/aeo/updated-badge'
 
 type Props = {
   params: Promise<{ slug: string }>
@@ -144,7 +146,7 @@ export default async function ReviewPage({ params }: Props) {
             )}
           </div>
 
-          <div className="flex items-center gap-6 text-sm text-muted-foreground">
+          <div className="flex flex-wrap items-center gap-6 text-sm">
             {review.author && (
               <div className="flex items-center gap-2">
                 {review.author.image && (
@@ -153,31 +155,16 @@ export default async function ReviewPage({ params }: Props) {
                 <div>
                   <div className="font-medium text-foreground">{review.author.name}</div>
                   {review.author.expertise && review.author.expertise.length > 0 && (
-                    <div className="text-xs">{review.author.expertise[0]}</div>
+                    <div className="text-xs text-muted-foreground">{review.author.expertise[0]}</div>
                   )}
                 </div>
               </div>
             )}
-            {review.publishedAt && (
-              <div>
-                Published{' '}
-                {new Date(review.publishedAt).toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                })}
-              </div>
-            )}
-            {review.updatedAt && review.updatedAt !== review.publishedAt && (
-              <div>
-                Updated{' '}
-                {new Date(review.updatedAt).toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                })}
-              </div>
-            )}
+            <UpdatedBadge
+              publishedAt={review.publishedAt}
+              updatedAt={review.updatedAt}
+              format="long"
+            />
           </div>
         </div>
       </div>
@@ -233,12 +220,19 @@ export default async function ReviewPage({ params }: Props) {
             </section>
           )}
 
-          {/* Verdict */}
+          {/* Verdict - AI-Optimized */}
           {review.verdict && (
-            <section className="border-l-4 border-primary pl-6 py-4 bg-muted/30">
-              <h3 className="font-semibold mb-2">Final Verdict</h3>
-              <p className="text-muted-foreground">{review.verdict}</p>
-            </section>
+            <Verdict
+              title="Final Verdict"
+              verdict={review.verdict}
+              rating={review.rating}
+              recommendation={
+                review.rating && review.rating >= 4.5 ? 'highly-recommended' :
+                review.rating && review.rating >= 3.5 ? 'recommended' :
+                review.rating && review.rating >= 2.5 ? 'conditional' :
+                'not-recommended'
+              }
+            />
           )}
 
           {/* Tool Info */}
