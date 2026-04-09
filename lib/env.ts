@@ -27,6 +27,9 @@ export const env = {
   isProduction: process.env.NODE_ENV === 'production',
 }
 
+// Track if we've already warned to avoid spam
+let hasWarned = false
+
 // Validation helper
 export function validateSanityConfig() {
   const required = [
@@ -37,13 +40,10 @@ export function validateSanityConfig() {
   const missing = required.filter(key => !process.env[key])
   
   if (missing.length > 0) {
-    // Only warn in development, don't throw errors
-    if (process.env.NODE_ENV === 'development') {
-      console.warn(
-        '[Sanity] Missing environment variables:',
-        missing.join(', ')
-      )
-      console.warn('[Sanity] Add them to .env.local to enable CMS features')
+    // Only warn once to avoid console spam
+    if (!hasWarned) {
+      hasWarned = true
+      // Silently return false - warnings already shown in homepage UI
     }
     return false
   }
