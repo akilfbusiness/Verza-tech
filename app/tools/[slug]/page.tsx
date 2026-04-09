@@ -2,6 +2,7 @@ import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getToolBySlug, getAllToolSlugs, getFAQsByTool } from '@/lib/sanity.queries'
+import { Breadcrumb } from '@/components/breadcrumb'
 
 type Props = {
   params: Promise<{ slug: string }>
@@ -24,22 +25,53 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     }
   }
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://verza.com'
+  const ogImageUrl = new URL('/api/og', siteUrl)
+  ogImageUrl.searchParams.set('title', tool.name)
+  ogImageUrl.searchParams.set('subtitle', tool.tagline || 'SaaS & AI Tool Review')
+  if (tool.rating) {
+    ogImageUrl.searchParams.set('rating', tool.rating.toString())
+  }
+
+  const metaDescription = tool.description || tool.tagline || `Comprehensive review of ${tool.name}. Learn about features, pricing, pros and cons, and find the best alternatives.`
+
   return {
-    title: `${tool.name} Review 2026 - Features, Pricing & Alternatives`,
-    description: tool.description || tool.tagline || `Comprehensive review of ${tool.name}. Learn about features, pricing, pros and cons, and find the best alternatives.`,
+    title: `${tool.name} Review 2026 - Features, Pricing & Alternatives | Verza`,
+    description: metaDescription,
     keywords: [
       tool.name,
       `${tool.name} review`,
+      `${tool.name} review 2026`,
       `${tool.name} pricing`,
       `${tool.name} alternatives`,
+      'SaaS review',
+      'AI tool review',
       ...(tool.categories?.map(c => c.name) || []),
     ],
+    alternates: {
+      canonical: `${siteUrl}/tools/${slug}`,
+    },
     openGraph: {
       title: `${tool.name} Review 2026`,
-      description: tool.tagline || tool.description,
+      description: metaDescription,
       type: 'article',
+      url: `${siteUrl}/tools/${slug}`,
       publishedTime: tool.publishedAt,
       modifiedTime: tool.updatedAt,
+      images: [
+        {
+          url: ogImageUrl.toString(),
+          width: 1200,
+          height: 630,
+          alt: `${tool.name} Review`,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${tool.name} Review 2026`,
+      description: metaDescription,
+      images: [ogImageUrl.toString()],
     },
   }
 }
@@ -62,6 +94,12 @@ export default async function ToolPage({ params }: Props) {
       {/* Hero Section */}
       <div className="border-b bg-muted/30">
         <div className="container mx-auto px-4 py-12 max-w-4xl">
+          <Breadcrumb
+            items={[
+              { label: 'Tools', href: '/tools' },
+              { label: tool.name },
+            ]}
+          />
           <div className="flex items-start gap-6">
             {tool.logo && (
               <div className="w-20 h-20 bg-background border rounded-xl flex-shrink-0" />

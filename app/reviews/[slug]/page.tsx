@@ -2,6 +2,7 @@ import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getReviewBySlug, getAllReviewSlugs } from '@/lib/sanity.queries'
+import { Breadcrumb } from '@/components/breadcrumb'
 
 type Props = {
   params: Promise<{ slug: string }>
@@ -25,23 +26,53 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   const toolName = review.tool?.name || 'Tool'
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://verza.com'
+  const ogImageUrl = new URL('/api/og', siteUrl)
+  ogImageUrl.searchParams.set('title', review.title)
+  ogImageUrl.searchParams.set('subtitle', `Review by ${review.author?.name || 'Verza'}`)
+  if (review.rating) {
+    ogImageUrl.searchParams.set('rating', review.rating.toString())
+  }
+
+  const metaDescription = review.verdict || `Expert review of ${toolName}. Read our in-depth analysis, ratings, pros and cons.`
 
   return {
-    title: `${review.title} | ${toolName} Review 2026`,
-    description: review.verdict || `Expert review of ${toolName}. Read our in-depth analysis, ratings, pros and cons.`,
+    title: `${review.title} | ${toolName} Review 2026 | Verza`,
+    description: metaDescription,
     keywords: [
       toolName,
       `${toolName} review`,
+      `${toolName} review 2026`,
       'tool review',
       'expert analysis',
+      'software review',
     ],
+    alternates: {
+      canonical: `${siteUrl}/reviews/${slug}`,
+    },
+    authors: review.author ? [{ name: review.author.name }] : undefined,
     openGraph: {
       title: review.title,
-      description: review.verdict,
+      description: metaDescription,
       type: 'article',
+      url: `${siteUrl}/reviews/${slug}`,
       publishedTime: review.publishedAt,
       modifiedTime: review.updatedAt,
       authors: review.author ? [review.author.name] : undefined,
+      images: [
+        {
+          url: ogImageUrl.toString(),
+          width: 1200,
+          height: 630,
+          alt: review.title,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: review.title,
+      description: metaDescription,
+      images: [ogImageUrl.toString()],
     },
   }
 }
@@ -61,6 +92,12 @@ export default async function ReviewPage({ params }: Props) {
       {/* Header */}
       <div className="border-b">
         <div className="container mx-auto px-4 py-12 max-w-4xl">
+          <Breadcrumb
+            items={[
+              { label: 'Reviews', href: '/reviews' },
+              { label: review.title },
+            ]}
+          />
           <div className="flex items-start gap-6 mb-6">
             {review.tool?.logo && (
               <div className="w-16 h-16 bg-background border rounded-xl flex-shrink-0" />
