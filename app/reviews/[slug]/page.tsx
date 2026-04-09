@@ -3,6 +3,12 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getReviewBySlug, getAllReviewSlugs } from '@/lib/sanity.queries'
 import { Breadcrumb } from '@/components/breadcrumb'
+import {
+  generateReviewSchema,
+  generateArticleSchema,
+  generateBreadcrumbSchema,
+  renderJsonLd,
+} from '@/lib/schema'
 
 type Props = {
   params: Promise<{ slug: string }>
@@ -87,8 +93,25 @@ export default async function ReviewPage({ params }: Props) {
     notFound()
   }
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://verza.com'
+
+  // Generate schema markup
+  const reviewSchema = generateReviewSchema(review)
+  const articleSchema = generateArticleSchema(review)
+  const breadcrumbSchema = generateBreadcrumbSchema([
+    { name: 'Home', url: siteUrl },
+    { name: 'Reviews', url: `${siteUrl}/reviews` },
+    { name: review.title, url: `${siteUrl}/reviews/${review.slug.current}` },
+  ])
+
   return (
-    <div className="min-h-screen bg-background">
+    <>
+      {/* JSON-LD Structured Data */}
+      {renderJsonLd(reviewSchema)}
+      {renderJsonLd(articleSchema)}
+      {renderJsonLd(breadcrumbSchema)}
+
+      <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="border-b">
         <div className="container mx-auto px-4 py-12 max-w-4xl">
@@ -261,6 +284,7 @@ export default async function ReviewPage({ params }: Props) {
           )}
         </article>
       </div>
-    </div>
+      </div>
+    </>
   )
 }

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
+import { generateOrganizationSchema, generateWebsiteSchema, renderJsonLd } from '@/lib/schema'
 import './globals.css'
 
 const geist = Geist({ 
@@ -109,8 +110,15 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const organizationSchema = generateOrganizationSchema()
+  const websiteSchema = generateWebsiteSchema()
+
   return (
     <html lang="en-AU" className={`${geist.variable} ${geistMono.variable}`}>
+      <head>
+        {renderJsonLd(organizationSchema)}
+        {renderJsonLd(websiteSchema)}
+      </head>
       <body className="font-sans antialiased">
         {children}
         <Analytics />

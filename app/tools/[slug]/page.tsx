@@ -3,6 +3,12 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getToolBySlug, getAllToolSlugs, getFAQsByTool } from '@/lib/sanity.queries'
 import { Breadcrumb } from '@/components/breadcrumb'
+import {
+  generateSoftwareApplicationSchema,
+  generateBreadcrumbSchema,
+  generateFAQPageSchema,
+  renderJsonLd,
+} from '@/lib/schema'
 
 type Props = {
   params: Promise<{ slug: string }>
@@ -89,8 +95,25 @@ export default async function ToolPage({ params }: Props) {
     notFound()
   }
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://verza.com'
+
+  // Generate schema markup
+  const softwareSchema = generateSoftwareApplicationSchema(tool)
+  const breadcrumbSchema = generateBreadcrumbSchema([
+    { name: 'Home', url: siteUrl },
+    { name: 'Tools', url: `${siteUrl}/tools` },
+    { name: tool.name, url: `${siteUrl}/tools/${tool.slug.current}` },
+  ])
+  const faqSchema = faqs.length > 0 ? generateFAQPageSchema(faqs) : null
+
   return (
-    <div className="min-h-screen bg-background">
+    <>
+      {/* JSON-LD Structured Data */}
+      {renderJsonLd(softwareSchema)}
+      {renderJsonLd(breadcrumbSchema)}
+      {faqSchema && renderJsonLd(faqSchema)}
+
+      <div className="min-h-screen bg-background">
       {/* Hero Section */}
       <div className="border-b bg-muted/30">
         <div className="container mx-auto px-4 py-12 max-w-4xl">
@@ -350,6 +373,7 @@ export default async function ToolPage({ params }: Props) {
           )}
         </div>
       </div>
-    </div>
+      </div>
+    </>
   )
 }
