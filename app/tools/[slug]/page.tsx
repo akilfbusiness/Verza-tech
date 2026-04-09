@@ -86,7 +86,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export const revalidate = 3600
+// Route Segment Config for Performance Optimization
+export const revalidate = 3600 // ISR - Revalidate every hour
+export const dynamic = 'force-static' // Pre-render at build time
+export const dynamicParams = true // Generate new pages on-demand
+export const fetchCache = 'default-cache' // Cache fetch requests
 
 export default async function ToolPage({ params }: Props) {
   const { slug } = await params
