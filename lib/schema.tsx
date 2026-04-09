@@ -22,6 +22,55 @@ export function generateOrganizationSchema() {
   }
 }
 
+// LocalBusiness Schema - Australian market focus
+export function generateLocalBusinessSchema() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'LocalBusiness',
+    '@id': `${siteUrl}/#localbusiness`,
+    name: 'Verza',
+    description: 'Australian-based SaaS and AI tool review platform helping businesses discover the best software solutions',
+    url: siteUrl,
+    logo: `${siteUrl}/logo.png`,
+    image: `${siteUrl}/og-image.png`,
+    telephone: '+61-XXX-XXX-XXX', // Replace with actual phone when available
+    email: 'hello@verza.com',
+    address: {
+      '@type': 'PostalAddress',
+      addressCountry: 'AU',
+      addressRegion: 'NSW', // Update with actual state/region
+      addressLocality: 'Sydney', // Update with actual city
+      // postalCode: 'XXXX', // Add when available
+      // streetAddress: 'XXX Street', // Add when available
+    },
+    geo: {
+      '@type': 'GeoCoordinates',
+      // latitude: -33.8688, // Add actual coordinates when available
+      // longitude: 151.2093,
+    },
+    areaServed: [
+      {
+        '@type': 'Country',
+        name: 'Australia',
+      },
+      {
+        '@type': 'Country',
+        name: 'Global',
+      },
+    ],
+    priceRange: 'Free',
+    openingHoursSpecification: {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+      opens: '00:00',
+      closes: '23:59',
+    },
+    sameAs: [
+      // Add social media links when available
+    ],
+  }
+}
+
 // Website Schema with SearchAction
 export function generateWebsiteSchema() {
   return {
@@ -77,13 +126,14 @@ export function generateSoftwareApplicationSchema(tool: Tool) {
     }
   }
 
-  // Add offers/pricing if available
+  // Add offers/pricing if available (supporting both USD and AUD)
   if (tool.pricing && tool.pricing.length > 0) {
     schema.offers = tool.pricing.map((tier) => ({
       '@type': 'Offer',
       name: tier.name,
       price: tier.price || '0',
       priceCurrency: 'USD',
+      availability: 'https://schema.org/InStock',
       ...(tier.billingPeriod && {
         priceValidUntil: new Date(
           new Date().setFullYear(new Date().getFullYear() + 1)

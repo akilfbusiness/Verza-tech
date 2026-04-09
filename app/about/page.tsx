@@ -1,14 +1,20 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
+import { generateLocalBusinessSchema, renderJsonLd } from '@/lib/schema'
 
 export const metadata: Metadata = {
-  title: 'About Verza',
-  description: 'Learn about Verza, our mission to help you discover the best SaaS and AI tools, and our expert team.',
+  title: 'About Verza - Australian SaaS & AI Tool Reviews',
+  description: 'Learn about Verza, an Australian-based platform helping businesses worldwide discover the best SaaS and AI tools through expert reviews and comparisons.',
 }
 
 export default function AboutPage() {
+  const localBusinessSchema = generateLocalBusinessSchema()
+
   return (
-    <div className="min-h-screen bg-background">
+    <>
+      {renderJsonLd(localBusinessSchema)}
+      
+      <div className="min-h-screen bg-background">
       <div className="border-b">
         <div className="container mx-auto px-4 py-12 max-w-4xl">
           <h1 className="text-4xl font-bold mb-4">About Verza</h1>
@@ -23,9 +29,15 @@ export default function AboutPage() {
           <section>
             <h2 className="text-2xl font-bold mb-4">Our Mission</h2>
             <p className="text-muted-foreground leading-relaxed">
-              At Verza, we believe that finding the right software shouldn&apos;t be overwhelming. 
-              With thousands of SaaS and AI tools available, we cut through the noise to bring you 
-              honest, in-depth reviews and comparisons that help you make informed decisions.
+              Based in Australia and serving businesses worldwide, Verza is committed to making 
+              software selection simple and transparent. We believe that finding the right tools 
+              shouldn&apos;t be overwhelming. With thousands of SaaS and AI tools available, we 
+              cut through the noise to bring you honest, in-depth reviews and comparisons that 
+              help you make informed decisions.
+            </p>
+            <p className="text-muted-foreground leading-relaxed mt-4">
+              Whether you&apos;re a startup in Sydney, an enterprise in Melbourne, or a business 
+              anywhere in the world, we provide the insights you need to choose software with confidence.
             </p>
           </section>
 
@@ -104,6 +116,20 @@ export default function AboutPage() {
           </section>
 
           <section>
+            <h2 className="text-2xl font-bold mb-4">Our Location</h2>
+            <p className="text-muted-foreground mb-4">
+              Verza operates from Australia, giving us unique insights into both the Asia-Pacific 
+              and global software markets. We understand the needs of Australian businesses while 
+              maintaining a worldwide perspective.
+            </p>
+            <div className="border rounded-lg p-6 bg-muted/30 mb-6">
+              <p className="text-sm font-medium mb-2">Verza</p>
+              <p className="text-sm text-muted-foreground">Australia-based</p>
+              <p className="text-sm text-muted-foreground">Serving businesses globally</p>
+            </div>
+          </section>
+
+          <section>
             <h2 className="text-2xl font-bold mb-4">Get in Touch</h2>
             <p className="text-muted-foreground mb-4">
               Have questions or suggestions? We&apos;d love to hear from you.
@@ -117,6 +143,7 @@ export default function AboutPage() {
           </section>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   )
 }

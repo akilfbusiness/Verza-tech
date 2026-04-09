@@ -2,8 +2,8 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Contact Us',
-  description: 'Get in touch with the Verza team. We would love to hear your feedback and suggestions.',
+  title: 'Contact Verza - Get in Touch',
+  description: 'Contact Verza for tool review suggestions, partnerships, or general enquiries. Based in Australia, serving businesses worldwide.',
 }
 
 export default function ContactPage() {
@@ -24,8 +24,9 @@ export default function ContactPage() {
             <section>
               <h2 className="text-2xl font-bold mb-4">Get in Touch</h2>
               <p className="text-muted-foreground mb-6">
-                Whether you have feedback on our reviews, suggestions for tools to cover, 
-                or questions about our platform, we&apos;re here to help.
+                Based in Australia and serving businesses globally, we&apos;re here to help 
+                with feedback on our reviews, suggestions for tools to cover, partnership 
+                opportunities, or general enquiries about our platform.
               </p>
             </section>
 
