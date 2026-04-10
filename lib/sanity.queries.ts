@@ -1,5 +1,5 @@
 import { client } from './sanity.config'
-import type { Tool, Category, Review, FAQ, Comparison, Author } from './sanity.types'
+import type { Tool, Category, Review, FAQ, Comparison, Author, Blog } from './sanity.types'
 
 // Reusable fragments
 const toolFragment = `
@@ -224,4 +224,134 @@ export async function getAllComparisonSlugs(): Promise<string[]> {
     }`
   )
   return comparisons.map((comparison) => comparison.slug.current)
+}
+
+// ─── BLOG QUERIES ──────────────────────────────────────────────────────────
+
+const blogListFragment = `
+  _id,
+  _createdAt,
+  _updatedAt,
+  title,
+  slug,
+  articleType,
+  excerpt,
+  publishedAt,
+  updatedAt,
+  heroImage,
+  affiliateDisclosure,
+  primaryAffiliateLink,
+  affiliateButtonLabel,
+  promoCode,
+  verdictBox,
+  keyPoints,
+  author-> {
+    _id,
+    name,
+    slug,
+    image,
+    expertise
+  },
+  categories[]-> {
+    _id,
+    name,
+    slug,
+    icon
+  }
+`
+
+const blogFullFragment = `
+  ${blogListFragment},
+  body,
+  faqs,
+  toolsCompared[] {
+    tool-> {
+      _id,
+      name,
+      slug,
+      logo,
+      website,
+      rating
+    },
+    rating,
+    verdict,
+    pros,
+    cons,
+    pricingLastVerified,
+    affiliateLink,
+    promoCode
+  },
+  secondaryAffiliateLinks,
+  gallery,
+  youtubeUrl,
+  videoTitle,
+  videoDescription,
+  metaTitle,
+  metaDescription,
+  focusKeyword,
+  nextReviewDate,
+  externalSources,
+  relatedArticles[]-> {
+    _id,
+    title,
+    slug,
+    excerpt,
+    heroImage,
+    publishedAt,
+    articleType,
+    categories[]-> { _id, name, slug }
+  }
+`
+
+export async function getAllBlogPosts(): Promise<Blog[]> {
+  return client.fetch(
+    `*[_type == "blog"] | order(publishedAt desc) {
+      ${blogListFragment}
+    }`
+  )
+}
+
+export async function getBlogPostBySlug(slug: string): Promise<Blog | null> {
+  return client.fetch(
+    `*[_type == "blog" && slug.current == $slug][0] {
+      ${blogFullFragment}
+    }`,
+    { slug }
+  )
+}
+
+export async function getBlogPostsByCategory(categorySlug: string): Promise<Blog[]> {
+  return client.fetch(
+    `*[_type == "blog" && $categorySlug in categories[]->slug.current] | order(publishedAt desc) {
+      ${blogListFragment}
+    }`,
+    { categorySlug }
+  )
+}
+
+export async function getFeaturedBlogPosts(limit: number = 6): Promise<Blog[]> {
+  return client.fetch(
+    `*[_type == "blog"] | order(publishedAt desc)[0...$limit] {
+      ${blogListFragment}
+    }`,
+    { limit }
+  )
+}
+
+export async function getAllBlogSlugs(): Promise<string[]> {
+  const posts = await client.fetch<{ slug: { current: string } }[]>(
+    `*[_type == "blog" && defined(slug.current)] {
+      "slug": slug
+    }`
+  )
+  return posts.map((post) => post.slug.current)
+}
+
+export async function getBlogPostsByArticleType(articleType: string): Promise<Blog[]> {
+  return client.fetch(
+    `*[_type == "blog" && articleType == $articleType] | order(publishedAt desc) {
+      ${blogListFragment}
+    }`,
+    { articleType }
+  )
 }

@@ -33,10 +33,12 @@ import { authorSchema } from './author.schema'
 import { reviewSchema } from './review.schema'
 import { faqSchema } from './faq.schema'
 import { comparisonSchema } from './comparison.schema'
+import { blogSchema } from './blog.schema'
 
 export const schemaTypes = [
-  toolSchema,
+  blogSchema,
   categorySchema,
+  toolSchema,
   authorSchema,
   reviewSchema,
   faqSchema,

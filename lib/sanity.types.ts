@@ -122,8 +122,86 @@ export interface Comparison {
   content: any // Portable Text
   comparisonTable?: {
     feature: string
-    values: Record<string, string | boolean>
+    tool1Value?: string
+    tool2Value?: string
   }[]
   verdict?: string
   publishedAt?: string
+}
+
+export interface BlogVerdictBox {
+  summary: string
+  rating?: number
+  recommendation?: 'highly-recommended' | 'recommended' | 'conditional' | 'not-recommended'
+  verdictChanged?: boolean
+  verdictChangedDate?: string
+}
+
+export interface BlogToolCompared {
+  tool: Tool
+  rating?: number
+  verdict?: string
+  pros?: string[]
+  cons?: string[]
+  pricingLastVerified?: string
+  affiliateLink?: string
+  promoCode?: string
+}
+
+export interface BlogFAQ {
+  question: string
+  answer: string
+}
+
+export interface BlogAffiliateLink {
+  label: string
+  url: string
+  promoCode?: string
+}
+
+export interface BlogExternalSource {
+  title: string
+  url: string
+}
+
+export interface Blog {
+  _id: string
+  _type: 'blog'
+  _createdAt: string
+  _updatedAt: string
+  title: string
+  slug: {
+    current: string
+  }
+  articleType: 'review' | 'comparison' | 'best-of' | 'tutorial' | 'news' | 'opinion'
+  author: Author
+  categories: Category[]
+  excerpt: string
+  body: any // Portable Text
+  publishedAt: string
+  updatedAt?: string
+  nextReviewDate?: string
+  // AEO fields
+  verdictBox?: BlogVerdictBox
+  keyPoints?: { point: string }[]
+  faqs?: BlogFAQ[]
+  toolsCompared?: BlogToolCompared[]
+  // Affiliate fields
+  primaryAffiliateLink?: string
+  affiliateButtonLabel?: string
+  secondaryAffiliateLinks?: BlogAffiliateLink[]
+  promoCode?: string
+  affiliateDisclosure?: boolean
+  // Media fields
+  heroImage?: SanityImage
+  gallery?: SanityImage[]
+  youtubeUrl?: string
+  videoTitle?: string
+  videoDescription?: string
+  // SEO fields
+  metaTitle?: string
+  metaDescription?: string
+  focusKeyword?: string
+  relatedArticles?: Blog[]
+  externalSources?: BlogExternalSource[]
 }
