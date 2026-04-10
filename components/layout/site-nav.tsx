@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Menu, X, ChevronDown } from 'lucide-react'
+import { Menu, X, ChevronDown, ChevronRight } from 'lucide-react'
 import type { Category } from '@/lib/sanity.types'
 
 interface SiteNavProps {
@@ -17,7 +17,9 @@ export function SiteNav({ categories = [] }: SiteNavProps) {
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/')
 
-  const navCategories = categories.filter((cat: any) => cat.showInNav !== false).slice(0, 6)
+  const navCategories = categories
+    .filter((cat) => cat.showInNav !== false)
+    .slice(0, 8)
 
   return (
     <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b">
@@ -63,25 +65,34 @@ export function SiteNav({ categories = [] }: SiteNavProps) {
               </button>
 
               {blogDropdownOpen && (
-                <div className="absolute top-full left-0 mt-1 w-52 bg-background border rounded-lg shadow-lg py-1 z-50">
+                <div className="absolute top-full left-0 mt-1 w-64 bg-background border rounded-xl shadow-xl py-2 z-50">
                   <Link
                     href="/blog"
-                    className="block px-4 py-2 text-sm hover:bg-secondary transition-colors font-medium"
+                    className="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-secondary transition-colors font-semibold rounded-lg mx-1"
                     onClick={() => setBlogDropdownOpen(false)}
                   >
                     All Articles
+                    <ChevronRight className="w-3.5 h-3.5 ml-auto text-muted-foreground" aria-hidden="true" />
                   </Link>
                   {navCategories.length > 0 && (
                     <>
-                      <div className="border-t my-1" />
+                      <div className="border-t my-2 mx-4" />
+                      <p className="px-4 py-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                        Browse by Category
+                      </p>
                       {navCategories.map((cat) => (
                         <Link
                           key={cat._id}
                           href={`/blog/category/${cat.slug.current}`}
-                          className="block px-4 py-2 text-sm hover:bg-secondary transition-colors"
+                          className="block px-4 py-2 mx-1 text-sm hover:bg-secondary transition-colors rounded-lg"
                           onClick={() => setBlogDropdownOpen(false)}
                         >
-                          {cat.name}
+                          <span className="font-medium">{cat.name}</span>
+                          {cat.description && (
+                            <span className="block text-xs text-muted-foreground mt-0.5 line-clamp-1">
+                              {cat.description}
+                            </span>
+                          )}
                         </Link>
                       ))}
                     </>

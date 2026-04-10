@@ -1,14 +1,14 @@
 import type { MetadataRoute } from 'next'
 
 export default function robots(): MetadataRoute.Robots {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://verza.com'
-  
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://verza.tech'
+
   return {
     rules: [
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/api/', '/admin/', '/studio/'],
+        disallow: ['/api/', '/admin/', '/studio', '/studio/'],
       },
       // Explicitly allow AI crawlers for AEO optimization
       {
@@ -27,9 +27,10 @@ export default function robots(): MetadataRoute.Robots {
           'Bytespider',          // ByteDance (for TikTok)
         ],
         allow: '/',
-        disallow: ['/api/', '/admin/', '/studio/'],
+        disallow: ['/api/', '/admin/', '/studio', '/studio/'],
       },
     ],
     sitemap: `${siteUrl}/sitemap.xml`,
+    host: siteUrl,
   }
 }

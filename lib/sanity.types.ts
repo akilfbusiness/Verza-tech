@@ -13,11 +13,11 @@ export interface Category {
   _createdAt: string
   _updatedAt: string
   name: string
-  slug: {
-    current: string
-  }
+  slug: { current: string }
   description?: string
   icon?: string
+  showInNav?: boolean
+  order?: number
 }
 
 export interface Author {
