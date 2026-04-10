@@ -126,9 +126,9 @@ export default async function BlogPage() {
                         <h2 className="text-2xl font-bold mb-3 text-balance group-hover:text-primary transition-colors">
                           {featured.title}
                         </h2>
-                        {featured.excerpt && (
+                        {(featured.summary || featured.excerpt) && (
                           <p className="text-muted-foreground mb-4 line-clamp-3">
-                            {featured.excerpt}
+                            {featured.summary || featured.excerpt}
                           </p>
                         )}
                         {featured.verdictBox && (
@@ -202,9 +202,9 @@ export default async function BlogPage() {
                           <h3 className="font-bold mb-2 text-balance group-hover:text-primary transition-colors line-clamp-2">
                             {post.title}
                           </h3>
-                          {post.excerpt && (
+                          {(post.summary || post.excerpt) && (
                             <p className="text-sm text-muted-foreground line-clamp-2 mb-3 flex-1">
-                              {post.excerpt}
+                              {post.summary || post.excerpt}
                             </p>
                           )}
                           <div className="flex items-center justify-between mt-auto pt-3 border-t text-xs text-muted-foreground">

@@ -2,14 +2,36 @@ import { ImageResponse } from 'next/og'
 
 export const runtime = 'edge'
 
+const TYPE_LABELS: Record<string, string> = {
+  review:     'Review',
+  comparison: 'Comparison',
+  'best-of':  'Best Of',
+  tutorial:   'Tutorial',
+  news:       'News',
+  opinion:    'Opinion',
+  category:   'Category',
+}
+
+// Brand colours
+const BRAND_BLACK  = '#0a0a0a'
+const BRAND_WHITE  = '#fafafa'
+const BRAND_PRIMARY = '#2563eb'   // blue-600 — adjust to match your actual primary
+const BRAND_MUTED  = '#71717a'
+const BRAND_BORDER = '#27272a'
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
-    
-    const title = searchParams.get('title') || 'Verza'
-    const subtitle = searchParams.get('subtitle') || 'SaaS & AI Tool Reviews'
-    const rating = searchParams.get('rating')
-    
+
+    const title    = searchParams.get('title')    || 'Verza'
+    const type     = searchParams.get('type')     || ''
+    const category = searchParams.get('category') || ''
+    const author   = searchParams.get('author')   || ''
+    const rating   = searchParams.get('rating')   || ''
+
+    // Truncate title so it never overflows
+    const displayTitle = title.length > 80 ? title.slice(0, 77) + '…' : title
+
     return new ImageResponse(
       (
         <div
@@ -18,105 +40,151 @@ export async function GET(request: Request) {
             width: '100%',
             display: 'flex',
             flexDirection: 'column',
-            alignItems: 'flex-start',
-            justifyContent: 'space-between',
-            backgroundColor: '#000',
-            backgroundImage: 'radial-gradient(circle at 25% 25%, rgba(99, 102, 241, 0.15) 0%, transparent 50%), radial-gradient(circle at 75% 75%, rgba(167, 139, 250, 0.15) 0%, transparent 50%)',
-            padding: '80px',
+            backgroundColor: BRAND_BLACK,
+            padding: '0',
+            fontFamily: 'system-ui, sans-serif',
           }}
         >
+          {/* Top accent bar */}
+          <div style={{ width: '100%', height: '6px', backgroundColor: BRAND_PRIMARY, display: 'flex' }} />
+
+          {/* Main content area */}
           <div
             style={{
+              flex: 1,
               display: 'flex',
               flexDirection: 'column',
-              flex: 1,
-              justifyContent: 'center',
-              width: '100%',
+              justifyContent: 'space-between',
+              padding: '64px 80px 56px',
             }}
           >
-            <h1
+            {/* Top row: type badge + category */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              {type && TYPE_LABELS[type] && (
+                <div
+                  style={{
+                    display: 'flex',
+                    padding: '6px 18px',
+                    borderRadius: '100px',
+                    backgroundColor: BRAND_PRIMARY,
+                    color: BRAND_WHITE,
+                    fontSize: '22px',
+                    fontWeight: 700,
+                    letterSpacing: '0.02em',
+                  }}
+                >
+                  {TYPE_LABELS[type]}
+                </div>
+              )}
+              {category && (
+                <div
+                  style={{
+                    display: 'flex',
+                    padding: '6px 18px',
+                    borderRadius: '100px',
+                    border: `2px solid ${BRAND_BORDER}`,
+                    color: BRAND_MUTED,
+                    fontSize: '22px',
+                    fontWeight: 500,
+                  }}
+                >
+                  {category}
+                </div>
+              )}
+            </div>
+
+            {/* Title */}
+            <div
               style={{
-                fontSize: '72px',
-                fontWeight: 'bold',
-                color: '#fff',
-                lineHeight: 1.1,
-                marginBottom: '24px',
-                maxWidth: '90%',
+                display: 'flex',
+                alignItems: 'flex-start',
+                flex: 1,
+                marginTop: '32px',
+                marginBottom: '32px',
               }}
             >
-              {title}
-            </h1>
-            <p
-              style={{
-                fontSize: '32px',
-                color: '#a1a1aa',
-                lineHeight: 1.4,
-                maxWidth: '80%',
-              }}
-            >
-              {subtitle}
-            </p>
-            {rating && (
-              <div
+              <h1
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  marginTop: '40px',
-                  gap: '16px',
+                  fontSize: displayTitle.length > 50 ? '60px' : '72px',
+                  fontWeight: 800,
+                  color: BRAND_WHITE,
+                  lineHeight: 1.15,
+                  letterSpacing: '-0.02em',
+                  maxWidth: rating ? '780px' : '100%',
+                  margin: 0,
                 }}
               >
+                {displayTitle}
+              </h1>
+
+              {/* Rating badge */}
+              {rating && (
                 <div
                   style={{
-                    fontSize: '64px',
-                    fontWeight: 'bold',
-                    color: '#6366f1',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginLeft: 'auto',
+                    width: '200px',
+                    height: '200px',
+                    borderRadius: '24px',
+                    border: `3px solid ${BRAND_PRIMARY}`,
+                    flexShrink: 0,
                   }}
                 >
-                  {rating}
+                  <div style={{ display: 'flex', fontSize: '72px', fontWeight: 800, color: BRAND_PRIMARY, lineHeight: 1 }}>
+                    {rating}
+                  </div>
+                  <div style={{ display: 'flex', fontSize: '24px', color: BRAND_MUTED, marginTop: '4px' }}>
+                    out of 5
+                  </div>
                 </div>
+              )}
+            </div>
+
+            {/* Bottom row: Verza brand + author */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                paddingTop: '24px',
+                borderTop: `1px solid ${BRAND_BORDER}`,
+              }}
+            >
+              {/* Logo wordmark */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <div
                   style={{
-                    fontSize: '28px',
-                    color: '#a1a1aa',
+                    width: '44px',
+                    height: '44px',
+                    borderRadius: '10px',
+                    backgroundColor: BRAND_PRIMARY,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '26px',
+                    fontWeight: 900,
+                    color: BRAND_WHITE,
                   }}
                 >
-                  / 5
+                  V
+                </div>
+                <div style={{ display: 'flex', fontSize: '30px', fontWeight: 800, color: BRAND_WHITE }}>
+                  Verza
+                </div>
+                <div style={{ display: 'flex', fontSize: '22px', color: BRAND_MUTED, marginLeft: '4px' }}>
+                  · Expert Tool Reviews
                 </div>
               </div>
-            )}
-          </div>
-          
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '16px',
-            }}
-          >
-            <div
-              style={{
-                fontSize: '32px',
-                fontWeight: 'bold',
-                color: '#fff',
-              }}
-            >
-              Verza
-            </div>
-            <div
-              style={{
-                fontSize: '24px',
-                color: '#6366f1',
-              }}
-            >
-              •
-            </div>
-            <div
-              style={{
-                fontSize: '24px',
-                color: '#a1a1aa',
-              }}
-            >
-              Expert Tool Reviews
+
+              {/* Author */}
+              {author && (
+                <div style={{ display: 'flex', fontSize: '22px', color: BRAND_MUTED }}>
+                  By {author}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -127,7 +195,6 @@ export async function GET(request: Request) {
       }
     )
   } catch (error) {
-    console.error('[v0] OG image generation error:', error)
     return new Response('Failed to generate image', { status: 500 })
   }
 }
