@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter, JetBrains_Mono } from 'next/font/google'
+import Script from 'next/script'
 import { Analytics } from '@vercel/analytics/next'
 import { generateOrganizationSchema, generateWebsiteSchema, renderJsonLd } from '@/lib/schema'
 import { SiteLayout } from '@/components/layout/site-layout'
@@ -40,6 +41,12 @@ export const metadata: Metadata = {
   authors: [{ name: siteName }],
   creator: siteName,
   publisher: siteName,
+  verification: {
+    google: 'zBMIraDoF3hPcg6NO6YduUiCiQfmXJWzKpAM3dEfFtE',
+    other: {
+      'msvalidate.01': '932E848ABAED86FFF610630F176F9F5F',
+    },
+  },
   robots: {
     index: true,
     follow: true,
@@ -125,6 +132,31 @@ export default function RootLayout({
           {children}
         </SiteLayout>
         <Analytics />
+
+        {/* Google Analytics 4 */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-JRT7F4V6BM"
+          strategy="afterInteractive"
+        />
+        <Script id="ga4-init" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-JRT7F4V6BM');
+          `}
+        </Script>
+
+        {/* Microsoft Clarity */}
+        <Script id="clarity-init" strategy="afterInteractive">
+          {`
+            (function(c,l,a,r,i,t,y){
+              c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+              t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+              y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+            })(window, document, "clarity", "script", "w9o6g0g5py");
+          `}
+        </Script>
       </body>
     </html>
   )
