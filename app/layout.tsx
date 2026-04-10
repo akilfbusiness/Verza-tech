@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { Inter, JetBrains_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { generateOrganizationSchema, generateWebsiteSchema, renderJsonLd } from '@/lib/schema'
+import { SiteLayout } from '@/components/layout/site-layout'
 import './globals.css'
 
 const inter = Inter({ 
@@ -120,7 +121,9 @@ export default function RootLayout({
         {renderJsonLd(websiteSchema)}
       </head>
       <body className="font-sans antialiased">
-        {children}
+        <SiteLayout>
+          {children}
+        </SiteLayout>
         <Analytics />
       </body>
     </html>

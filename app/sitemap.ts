@@ -4,6 +4,7 @@ import {
   getAllReviewSlugs,
   getAllCategorySlugs,
   getAllComparisonSlugs,
+  getAllBlogSlugs,
 } from '@/lib/sanity.queries'
 
 export const revalidate = 3600 // Revalidate every hour
@@ -21,6 +22,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     {
       url: `${siteUrl}/tools`,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.9,
+    },
+    {
+      url: `${siteUrl}/blog`,
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 0.9,
@@ -53,11 +60,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   try {
     // Dynamic pages from Sanity
-    const [toolSlugs, reviewSlugs, categorySlugs, comparisonSlugs] = await Promise.all([
+    const [toolSlugs, reviewSlugs, categorySlugs, comparisonSlugs, blogSlugs] = await Promise.all([
       getAllToolSlugs(),
       getAllReviewSlugs(),
       getAllCategorySlugs(),
       getAllComparisonSlugs(),
+      getAllBlogSlugs(),
     ])
 
     const toolPages: MetadataRoute.Sitemap = toolSlugs.map((slug) => ({
@@ -88,7 +96,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.6,
     }))
 
-    return [...staticPages, ...toolPages, ...reviewPages, ...categoryPages, ...comparisonPages]
+    const blogPages: MetadataRoute.Sitemap = blogSlugs.map((slug) => ({
+      url: `${siteUrl}/blog/${slug}`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.8,
+    }))
+
+    return [...staticPages, ...toolPages, ...blogPages, ...reviewPages, ...categoryPages, ...comparisonPages]
   } catch (error) {
     console.error('[v0] Error generating sitemap:', error)
     // Return at least static pages if Sanity fetch fails
