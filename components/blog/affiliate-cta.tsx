@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { ExternalLink, Copy, Check } from 'lucide-react'
+import { buildAffiliateUrl, toCampaignSlug } from '@/lib/utm'
 
 interface AffiliateCTAProps {
   primaryLink?: string
@@ -9,6 +10,10 @@ interface AffiliateCTAProps {
   promoCode?: string
   disclosure?: boolean
   variant?: 'hero' | 'inline' | 'sticky'
+  /** Tool name or slug for utm_campaign. Defaults to derived from URL. */
+  campaign?: string
+  /** Article slug for utm_content tracking */
+  articleSlug?: string
 }
 
 export function AffiliateCTA({
@@ -17,10 +22,22 @@ export function AffiliateCTA({
   promoCode,
   disclosure = true,
   variant = 'hero',
+  campaign,
+  articleSlug,
 }: AffiliateCTAProps) {
   const [copied, setCopied] = useState(false)
 
   if (!primaryLink) return null
+
+  // Derive campaign slug from URL hostname if not explicitly provided
+  const resolvedCampaign = campaign
+    ? toCampaignSlug(campaign)
+    : toCampaignSlug(new URL(primaryLink).hostname.replace(/^www\./, ''))
+
+  const trackedUrl = buildAffiliateUrl(primaryLink, {
+    campaign: resolvedCampaign,
+    content: articleSlug,
+  })
 
   const handleCopy = () => {
     if (promoCode) {
@@ -35,7 +52,7 @@ export function AffiliateCTA({
       <div className="fixed bottom-0 left-0 right-0 z-40 bg-background border-t shadow-lg md:hidden">
         <div className="container mx-auto px-4 py-3 flex items-center gap-3">
           <a
-            href={primaryLink}
+            href={trackedUrl}
             target="_blank"
             rel="nofollow noopener noreferrer sponsored"
             className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-primary text-primary-foreground font-semibold text-sm"
@@ -76,7 +93,7 @@ export function AffiliateCTA({
             </button>
           )}
           <a
-            href={primaryLink}
+            href={trackedUrl}
             target="_blank"
             rel="nofollow noopener noreferrer sponsored"
             className="flex items-center gap-2 px-6 py-2.5 rounded-lg bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-colors"

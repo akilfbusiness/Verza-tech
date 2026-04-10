@@ -1,6 +1,7 @@
 import { client } from './sanity.config'
 import type { Tool, Category, Review, FAQ, Comparison, Author, Blog } from './sanity.types'
 
+
 // Reusable fragments
 const toolFragment = `
   _id,
@@ -39,6 +40,9 @@ const authorFragment = `
   name,
   slug,
   bio,
+  role,
+  yearsOfExperience,
+  certifications,
   image,
   expertise,
   socialLinks
@@ -82,12 +86,14 @@ export async function getToolsByCategory(categorySlug: string): Promise<Tool[]> 
 // Category queries
 export async function getAllCategories(): Promise<Category[]> {
   return client.fetch(
-    `*[_type == "category"] | order(name asc) {
+    `*[_type == "category"] | order(coalesce(order, 99) asc, name asc) {
       _id,
       name,
       slug,
       description,
-      icon
+      icon,
+      showInNav,
+      order
     }`
   )
 }
@@ -368,5 +374,41 @@ export async function getBlogPostsByArticleType(articleType: string): Promise<Bl
       ${blogListFragment}
     }`,
     { articleType }
+  )
+}
+
+// ─── AUTHOR QUERIES ────────────────────────────────────────────────────────
+
+export async function getAllAuthorSlugs(): Promise<string[]> {
+  const authors = await client.fetch<{ slug: { current: string } }[]>(
+    `*[_type == "author" && defined(slug.current)] { "slug": slug }`
+  )
+  return authors.map((a) => a.slug.current)
+}
+
+export async function getAuthorBySlug(slug: string): Promise<Author | null> {
+  return client.fetch(
+    `*[_type == "author" && slug.current == $slug][0] {
+      ${authorFragment}
+    }`,
+    { slug }
+  )
+}
+
+export async function getBlogPostsByAuthor(authorSlug: string): Promise<Blog[]> {
+  return client.fetch(
+    `*[_type == "blog" && author->slug.current == $authorSlug] | order(publishedAt desc) {
+      ${blogListFragment}
+    }`,
+    { authorSlug }
+  )
+}
+
+// Get all authors for sitemap / listing
+export async function getAllAuthors(): Promise<Author[]> {
+  return client.fetch(
+    `*[_type == "author"] | order(name asc) {
+      ${authorFragment}
+    }`
   )
 }

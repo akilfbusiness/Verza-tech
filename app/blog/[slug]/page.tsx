@@ -10,7 +10,8 @@ import { VerdictBox } from '@/components/blog/verdict-box'
 import { AffiliateCTA } from '@/components/blog/affiliate-cta'
 import { PortableText } from '@/components/blog/portable-text'
 import { ReadingProgress } from '@/components/blog/reading-progress'
-import { generateBreadcrumbSchema, renderJsonLd } from '@/lib/schema'
+import { NewsletterCTA } from '@/components/blog/newsletter-cta'
+import { generateBreadcrumbSchema, generateHowToSchema, renderJsonLd } from '@/lib/schema'
 
 export const revalidate = 60
 export const dynamicParams = true
@@ -116,9 +117,18 @@ function generateFAQSchema(faqs: { question: string; quickAnswer: string; fullAn
   }
 }
 
-function generateHowToSchema(post: any, siteUrl: string) {
-  // Only generate if any contentSection has a howToBlock
-  return null
+function extractHowToSteps(contentSections: any[]): { heading: string; text?: string }[] {
+  const steps: { heading: string; text?: string }[] = []
+  for (const section of contentSections || []) {
+    for (const block of section.content || []) {
+      if (block._type === 'howToBlock' && Array.isArray(block.steps)) {
+        for (const step of block.steps) {
+          steps.push({ heading: step.title || step.heading || '', text: step.description })
+        }
+      }
+    }
+  }
+  return steps
 }
 
 function generateVideoSchema(post: any, siteUrl: string) {
@@ -161,6 +171,10 @@ export default async function BlogArticlePage({ params }: Props) {
   const articleSchema = generateBlogArticleSchema(post, siteUrl)
   const faqSchema = post.faqs?.length > 0 ? generateFAQSchema(post.faqs) : null
   const videoSchema = post.youtubeUrl ? generateVideoSchema(post, siteUrl) : null
+  const howToSteps = extractHowToSteps(post.contentSections || [])
+  const howToSchema = howToSteps.length > 0
+    ? generateHowToSchema(post.title, post.summary || '', howToSteps, `${siteUrl}/blog/${post.slug.current}`)
+    : null
   const breadcrumbItems = [
     { name: 'Home', url: siteUrl },
     { name: 'Blog', url: `${siteUrl}/blog` },
@@ -177,6 +191,7 @@ export default async function BlogArticlePage({ params }: Props) {
       {renderJsonLd(articleSchema)}
       {faqSchema && renderJsonLd(faqSchema)}
       {videoSchema && renderJsonLd(videoSchema)}
+      {howToSchema && renderJsonLd(howToSchema)}
       {renderJsonLd(breadcrumbSchema)}
 
       <ReadingProgress />
@@ -343,6 +358,7 @@ export default async function BlogArticlePage({ params }: Props) {
               promoCode={post.promoCode}
               disclosure={false}
               variant="hero"
+              articleSlug={slug}
             />
           )}
 
@@ -467,6 +483,7 @@ export default async function BlogArticlePage({ params }: Props) {
                   promoCode={link.promoCode}
                   disclosure={false}
                   variant="inline"
+                  articleSlug={slug}
                 />
               ))}
             </div>
@@ -481,6 +498,7 @@ export default async function BlogArticlePage({ params }: Props) {
                 promoCode={post.promoCode}
                 disclosure={post.affiliateDisclosure}
                 variant="hero"
+                articleSlug={slug}
               />
             </div>
           )}
@@ -623,7 +641,13 @@ export default async function BlogArticlePage({ params }: Props) {
             </section>
           )}
 
-          {/* 15. Related articles */}
+          {/* 15. Newsletter CTA */}
+          <NewsletterCTA
+            variant="card"
+            source={`blog-article-${slug}`}
+          />
+
+          {/* 16. Related articles */}
           {post.relatedArticles?.length > 0 && (
             <section className="mt-12 pt-8 border-t" aria-label="Related articles">
               <h2 className="text-xl font-bold mb-6">Related Articles</h2>
@@ -665,6 +689,7 @@ export default async function BlogArticlePage({ params }: Props) {
           primaryLink={post.primaryAffiliateLink}
           buttonLabel={post.affiliateButtonLabel}
           variant="sticky"
+          articleSlug={slug}
         />
       )}
     </>

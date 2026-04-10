@@ -1,6 +1,6 @@
 import { Tool, Review, Author, FAQ, Category } from './sanity.types'
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://verza.com'
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://verza.tech'
 
 // Organization Schema - Used site-wide
 export function generateOrganizationSchema() {
@@ -22,52 +22,15 @@ export function generateOrganizationSchema() {
   }
 }
 
-// LocalBusiness Schema - Australian market focus
-export function generateLocalBusinessSchema() {
+// WebPage Schema for generic pages
+export function generateWebPageSchema(title: string, description: string, url: string) {
   return {
     '@context': 'https://schema.org',
-    '@type': 'LocalBusiness',
-    '@id': `${siteUrl}/#localbusiness`,
-    name: 'Verza',
-    description: 'Australian-based SaaS and AI tool review platform helping businesses discover the best software solutions',
-    url: siteUrl,
-    logo: `${siteUrl}/logo.png`,
-    image: `${siteUrl}/og-image.png`,
-    telephone: '+61-XXX-XXX-XXX', // Replace with actual phone when available
-    email: 'hello@verza.com',
-    address: {
-      '@type': 'PostalAddress',
-      addressCountry: 'AU',
-      addressRegion: 'NSW', // Update with actual state/region
-      addressLocality: 'Sydney', // Update with actual city
-      // postalCode: 'XXXX', // Add when available
-      // streetAddress: 'XXX Street', // Add when available
-    },
-    geo: {
-      '@type': 'GeoCoordinates',
-      // latitude: -33.8688, // Add actual coordinates when available
-      // longitude: 151.2093,
-    },
-    areaServed: [
-      {
-        '@type': 'Country',
-        name: 'Australia',
-      },
-      {
-        '@type': 'Country',
-        name: 'Global',
-      },
-    ],
-    priceRange: 'Free',
-    openingHoursSpecification: {
-      '@type': 'OpeningHoursSpecification',
-      dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
-      opens: '00:00',
-      closes: '23:59',
-    },
-    sameAs: [
-      // Add social media links when available
-    ],
+    '@type': 'WebPage',
+    name: title,
+    description,
+    url,
+    isPartOf: { '@type': 'WebSite', name: 'Verza', url: siteUrl },
   }
 }
 
@@ -296,6 +259,28 @@ export function generateArticleSchema(review: Review) {
   }
 
   return schema
+}
+
+// HowTo Schema — generated from howToBlock content sections
+export function generateHowToSchema(
+  name: string,
+  description: string,
+  steps: { heading: string; text?: string }[],
+  url: string
+) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'HowTo',
+    name,
+    description,
+    url,
+    step: steps.map((step, i) => ({
+      '@type': 'HowToStep',
+      position: i + 1,
+      name: step.heading,
+      text: step.text || step.heading,
+    })),
+  }
 }
 
 // Helper to render JSON-LD script tag
