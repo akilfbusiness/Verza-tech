@@ -246,8 +246,18 @@ const blogListFragment = `
   promoCode,
   verdictBox,
   keyPoints,
-  authorName,
-  authorRole,
+  author-> {
+    _id,
+    name,
+    slug,
+    role,
+    yearsOfExperience,
+    certifications,
+    expertise,
+    image,
+    bio,
+    socialLinks
+  },
   categories[]-> {
     _id,
     name,
@@ -295,8 +305,6 @@ const blogFullFragment = `
   targetKeywords,
   reviewFrequency,
   nextReviewDate,
-  yearsOfExperience,
-  certifications,
   relatedArticles[]-> {
     _id,
     title,
@@ -305,6 +313,7 @@ const blogFullFragment = `
     heroImage,
     publishedAt,
     articleType,
+    author-> { _id, name, slug, role, image },
     categories[]-> { _id, name, slug }
   }
 `

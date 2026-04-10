@@ -26,10 +26,11 @@ export interface Author {
   _createdAt: string
   _updatedAt: string
   name: string
-  slug: {
-    current: string
-  }
+  slug: { current: string }
   bio?: string
+  role?: string
+  yearsOfExperience?: number
+  certifications?: string[]
   image?: SanityImage
   expertise?: string[]
   socialLinks?: {
@@ -196,16 +197,13 @@ export interface Blog {
   summary: string
   introduction: string
   contentSections?: BlogContentSection[]
+  // Authorship (referenced Author document)
+  author?: Author
+  estimatedReadTime?: number
   publishedAt: string
   updatedAt?: string
   reviewFrequency?: 'monthly' | 'quarterly' | 'bi-annually' | 'annually'
   nextReviewDate?: string
-  estimatedReadTime?: number
-  // Authorship (inline E-E-A-T)
-  authorName?: string
-  authorRole?: string
-  yearsOfExperience?: number
-  certifications?: string[]
   // AEO fields
   verdictBox?: BlogVerdictBox
   keyPoints?: BlogKeyPoint[]
