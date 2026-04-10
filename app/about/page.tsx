@@ -1,18 +1,25 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
-import { generateLocalBusinessSchema, renderJsonLd } from '@/lib/schema'
+import { generateWebPageSchema, renderJsonLd } from '@/lib/schema'
+
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://verza.tech'
 
 export const metadata: Metadata = {
-  title: 'About Verza - Australian SaaS & AI Tool Reviews',
-  description: 'Learn about Verza, an Australian-based platform helping businesses worldwide discover the best SaaS and AI tools through expert reviews and comparisons.',
+  title: 'About Verza | SaaS & AI Tool Reviews',
+  description: 'Learn about Verza — an independent platform helping businesses worldwide discover the best SaaS and AI tools through expert reviews and comparisons.',
+  alternates: { canonical: `${siteUrl}/about` },
 }
 
 export default function AboutPage() {
-  const localBusinessSchema = generateLocalBusinessSchema()
+  const webPageSchema = generateWebPageSchema(
+    'About Verza',
+    'Independent SaaS and AI tool reviews, comparisons, and guides to help you choose the right software.',
+    `${siteUrl}/about`
+  )
 
   return (
     <>
-      {renderJsonLd(localBusinessSchema)}
+      {renderJsonLd(webPageSchema)}
       
       <div className="min-h-screen bg-background">
       <div className="border-b">
