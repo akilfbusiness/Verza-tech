@@ -1,4 +1,4 @@
-import { getAllCategories } from '@/lib/sanity.queries'
+import { getAllCategories, getSiteSettings, getNavigation } from '@/lib/sanity.queries'
 import { SiteNav } from './site-nav'
 import { SiteFooter } from './site-footer'
 
@@ -7,14 +7,25 @@ interface SiteLayoutProps {
 }
 
 export async function SiteLayout({ children }: SiteLayoutProps) {
-  // Fetch categories server-side so nav and footer always have fresh data
-  const categories = await getAllCategories().catch(() => [])
+  const [categories, siteSettings, navigation] = await Promise.all([
+    getAllCategories().catch(() => []),
+    getSiteSettings().catch(() => null),
+    getNavigation().catch(() => null),
+  ])
 
   return (
     <>
-      <SiteNav categories={categories} />
+      <SiteNav
+        categories={categories}
+        navigation={navigation}
+        siteSettings={siteSettings}
+      />
       <main>{children}</main>
-      <SiteFooter categories={categories} />
+      <SiteFooter
+        categories={categories}
+        navigation={navigation}
+        siteSettings={siteSettings}
+      />
     </>
   )
 }

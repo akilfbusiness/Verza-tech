@@ -1,5 +1,42 @@
 import { client } from './sanity.config'
-import type { Tool, Category, Review, FAQ, Comparison, Author, Blog } from './sanity.types'
+import type { Tool, Category, Review, FAQ, Comparison, Author, Blog, SiteSettings, Navigation } from './sanity.types'
+
+// ─── SITE SETTINGS (singleton) ───────────────────────────────────────────────
+
+export async function getSiteSettings(): Promise<SiteSettings | null> {
+  return client.fetch(
+    `*[_type == "siteSettings" && _id == "siteSettings"][0]`
+  )
+}
+
+// ─── NAVIGATION (singleton) ──────────────────────────────────────────────────
+
+export async function getNavigation(): Promise<Navigation | null> {
+  return client.fetch(
+    `*[_type == "navigation" && _id == "navigation"][0] {
+      _id,
+      _type,
+      title,
+      headerItems[] {
+        label,
+        href,
+        openInNewTab,
+        isBlogDropdown,
+        dropdown[] { label, href, openInNewTab }
+      },
+      headerCtaEnabled,
+      headerCtaLabel,
+      headerCtaLink,
+      headerCtaStyle,
+      footerTagline,
+      footerColumns[] {
+        heading,
+        links[] { label, href, openInNewTab }
+      },
+      footerBottomLinks[] { label, href, openInNewTab }
+    }`
+  )
+}
 
 
 // Reusable fragments

@@ -34,8 +34,14 @@ import { reviewSchema } from './review.schema'
 import { faqSchema } from './faq.schema'
 import { comparisonSchema } from './comparison.schema'
 import { blogSchema } from './blog.schema'
+import { siteSettingsSchema } from './siteSettings.schema'
+import { navigationSchema } from './navigation.schema'
 
 export const schemaTypes = [
+  // Singletons — site-wide config
+  siteSettingsSchema,
+  navigationSchema,
+  // Content
   blogSchema,
   categorySchema,
   toolSchema,

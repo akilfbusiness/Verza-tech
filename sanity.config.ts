@@ -20,6 +20,27 @@ export default defineConfig({
         S.list()
           .title('Content')
           .items([
+            // ── Singletons ──────────────────────────────────────────────────
+            S.listItem()
+              .title('Site Settings')
+              .id('siteSettings')
+              .child(
+                S.document()
+                  .schemaType('siteSettings')
+                  .documentId('siteSettings')
+                  .title('Site Settings')
+              ),
+            S.listItem()
+              .title('Navigation')
+              .id('navigation')
+              .child(
+                S.document()
+                  .schemaType('navigation')
+                  .documentId('navigation')
+                  .title('Navigation')
+              ),
+            S.divider(),
+            // ── Content ─────────────────────────────────────────────────────
             S.listItem()
               .title('Blog Articles')
               .child(
@@ -78,5 +99,10 @@ export default defineConfig({
 
   schema: {
     types: schemaTypes,
+    // Prevent singletons from showing in the default document list
+    templates: (templates) =>
+      templates.filter(
+        ({ schemaType }) => !['siteSettings', 'navigation'].includes(schemaType)
+      ),
   },
 })
