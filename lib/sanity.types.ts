@@ -137,6 +137,18 @@ export interface BlogVerdictBox {
   verdictChangedDate?: string
 }
 
+export interface BlogKeyPoint {
+  question?: string
+  quickAnswer: string
+  fullExplanation?: string
+}
+
+export interface BlogFAQ {
+  question: string
+  quickAnswer: string
+  fullAnswer?: string
+}
+
 export interface BlogToolCompared {
   tool: Tool
   rating?: number
@@ -148,20 +160,27 @@ export interface BlogToolCompared {
   promoCode?: string
 }
 
-export interface BlogFAQ {
-  question: string
-  answer: string
-}
-
 export interface BlogAffiliateLink {
   label: string
   url: string
   promoCode?: string
 }
 
-export interface BlogExternalSource {
+export interface BlogDataSource {
   title: string
   url: string
+}
+
+export interface BlogRelatedResource {
+  title: string
+  url: string
+  description?: string
+  resourceType?: 'internal' | 'external' | 'government' | 'research' | 'tool'
+}
+
+export interface BlogContentSection {
+  heading: string
+  content: any // Portable Text
 }
 
 export interface Blog {
@@ -170,22 +189,30 @@ export interface Blog {
   _createdAt: string
   _updatedAt: string
   title: string
-  slug: {
-    current: string
-  }
+  slug: { current: string }
   articleType: 'review' | 'comparison' | 'best-of' | 'tutorial' | 'news' | 'opinion'
-  author: Author
   categories: Category[]
-  excerpt: string
-  body: any // Portable Text
+  targetAudience?: string[]
+  summary: string
+  introduction: string
+  contentSections?: BlogContentSection[]
   publishedAt: string
   updatedAt?: string
+  reviewFrequency?: 'monthly' | 'quarterly' | 'bi-annually' | 'annually'
   nextReviewDate?: string
+  estimatedReadTime?: number
+  // Authorship (inline E-E-A-T)
+  authorName?: string
+  authorRole?: string
+  yearsOfExperience?: number
+  certifications?: string[]
   // AEO fields
   verdictBox?: BlogVerdictBox
-  keyPoints?: { point: string }[]
+  keyPoints?: BlogKeyPoint[]
   faqs?: BlogFAQ[]
   toolsCompared?: BlogToolCompared[]
+  dataSources?: BlogDataSource[]
+  relatedResources?: BlogRelatedResource[]
   // Affiliate fields
   primaryAffiliateLink?: string
   affiliateButtonLabel?: string
@@ -202,6 +229,6 @@ export interface Blog {
   metaTitle?: string
   metaDescription?: string
   focusKeyword?: string
+  targetKeywords?: string[]
   relatedArticles?: Blog[]
-  externalSources?: BlogExternalSource[]
 }

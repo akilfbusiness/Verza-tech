@@ -235,9 +235,10 @@ const blogListFragment = `
   title,
   slug,
   articleType,
-  excerpt,
+  summary,
   publishedAt,
   updatedAt,
+  estimatedReadTime,
   heroImage,
   affiliateDisclosure,
   primaryAffiliateLink,
@@ -245,24 +246,24 @@ const blogListFragment = `
   promoCode,
   verdictBox,
   keyPoints,
-  author-> {
-    _id,
-    name,
-    slug,
-    image,
-    expertise
-  },
+  authorName,
+  authorRole,
   categories[]-> {
     _id,
     name,
     slug,
     icon
-  }
+  },
+  targetAudience
 `
 
 const blogFullFragment = `
   ${blogListFragment},
-  body,
+  introduction,
+  contentSections[] {
+    heading,
+    content
+  },
   faqs,
   toolsCompared[] {
     tool-> {
@@ -281,6 +282,8 @@ const blogFullFragment = `
     affiliateLink,
     promoCode
   },
+  dataSources,
+  relatedResources,
   secondaryAffiliateLinks,
   gallery,
   youtubeUrl,
@@ -289,13 +292,16 @@ const blogFullFragment = `
   metaTitle,
   metaDescription,
   focusKeyword,
+  targetKeywords,
+  reviewFrequency,
   nextReviewDate,
-  externalSources,
+  yearsOfExperience,
+  certifications,
   relatedArticles[]-> {
     _id,
     title,
     slug,
-    excerpt,
+    summary,
     heroImage,
     publishedAt,
     articleType,
