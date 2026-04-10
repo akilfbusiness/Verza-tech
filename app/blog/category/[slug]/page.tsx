@@ -3,7 +3,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { getBlogPostsByCategory, getCategoryBySlug, getAllCategories, getAllCategorySlugs } from '@/lib/sanity.queries'
-import { urlForImage } from '@/lib/sanity.config'
+import { urlForImage } from '@/lib/sanity.image'
 import { Breadcrumb } from '@/components/breadcrumb'
 
 export const revalidate = 60

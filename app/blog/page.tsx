@@ -2,7 +2,7 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { getAllBlogPosts, getAllCategories } from '@/lib/sanity.queries'
-import { urlForImage } from '@/lib/sanity.config'
+import { urlForImage } from '@/lib/sanity.image'
 import { generateItemListSchema, renderJsonLd } from '@/lib/schema'
 import { Breadcrumb } from '@/components/breadcrumb'
 

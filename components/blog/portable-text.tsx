@@ -1,6 +1,6 @@
 import { PortableText as SanityPortableText } from '@portabletext/react'
 import Image from 'next/image'
-import { urlForImage } from '@/lib/sanity.config'
+import { urlForImage } from '@/lib/sanity.image'
 import { ExternalLink } from 'lucide-react'
 
 const components = {
