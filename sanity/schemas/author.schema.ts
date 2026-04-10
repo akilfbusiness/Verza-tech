@@ -42,11 +42,31 @@ export const authorSchema = {
       ],
     },
     {
+      name: 'role',
+      title: 'Role / Title',
+      type: 'string',
+      description: 'e.g. "Senior AI Tools Analyst", "Founder & Editor"',
+    },
+    {
+      name: 'yearsOfExperience',
+      title: 'Years of Experience',
+      type: 'number',
+    },
+    {
+      name: 'certifications',
+      title: 'Certifications / Credentials',
+      type: 'array',
+      of: [{ type: 'string' }],
+      options: { layout: 'tags' },
+      description: 'e.g. "Google Analytics Certified", "HubSpot Content Marketing"',
+    },
+    {
       name: 'expertise',
       title: 'Areas of Expertise',
       type: 'array',
       of: [{ type: 'string' }],
-      description: 'E.g., "SaaS", "AI Tools", "Productivity"',
+      options: { layout: 'tags' },
+      description: 'e.g. "SaaS", "AI Tools", "Productivity", "B2B Marketing"',
     },
     {
       name: 'socialLinks',

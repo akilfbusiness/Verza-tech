@@ -5,18 +5,8 @@ const tableBlock = {
   name: 'tableBlock',
   title: 'Data Table',
   fields: [
-    {
-      name: 'tableTitle',
-      title: 'Table Title',
-      type: 'string',
-      description: 'Optional title for the table',
-    },
-    {
-      name: 'tableCaption',
-      title: 'Table Caption',
-      type: 'string',
-      description: 'Optional caption or source citation',
-    },
+    { name: 'tableTitle', title: 'Table Title', type: 'string', description: 'Optional title for the table' },
+    { name: 'tableCaption', title: 'Table Caption', type: 'string', description: 'Optional caption or source citation' },
     {
       name: 'columnHeaders',
       title: 'Column Headers',
@@ -34,12 +24,7 @@ const tableBlock = {
           name: 'tableRow',
           title: 'Row',
           fields: [
-            {
-              name: 'cells',
-              title: 'Cells',
-              type: 'array',
-              of: [{ type: 'string' }],
-            },
+            { name: 'cells', title: 'Cells', type: 'array', of: [{ type: 'string' }] },
           ],
           preview: {
             select: { cells: 'cells' },
@@ -104,6 +89,142 @@ const calloutBlock = {
   },
 }
 
+const pullQuoteBlock = {
+  type: 'object',
+  name: 'pullQuoteBlock',
+  title: 'Pull Quote',
+  fields: [
+    {
+      name: 'quote',
+      title: 'Quote',
+      type: 'text',
+      rows: 3,
+      description: 'A standout quote or key stat to highlight visually mid-article.',
+      validation: (Rule: any) => Rule.required(),
+    },
+    { name: 'attribution', title: 'Attribution', type: 'string', description: 'Source or speaker (optional)' },
+  ],
+  preview: {
+    select: { title: 'quote', subtitle: 'attribution' },
+    prepare({ title, subtitle }: any) {
+      return { title: `"${title?.slice(0, 60) || 'Pull Quote'}"`, subtitle: subtitle || '' }
+    },
+  },
+}
+
+const statHighlightBlock = {
+  type: 'object',
+  name: 'statHighlightBlock',
+  title: 'Stat / Data Highlight',
+  fields: [
+    {
+      name: 'stat',
+      title: 'Statistic',
+      type: 'string',
+      description: 'e.g. "73%" or "$4.2B"',
+      validation: (Rule: any) => Rule.required(),
+    },
+    {
+      name: 'context',
+      title: 'Context',
+      type: 'string',
+      description: 'e.g. "of marketers use AI tools daily"',
+      validation: (Rule: any) => Rule.required(),
+    },
+    { name: 'source', title: 'Source', type: 'string', description: 'e.g. "HubSpot State of Marketing 2026"' },
+    { name: 'sourceUrl', title: 'Source URL', type: 'url' },
+  ],
+  preview: {
+    select: { stat: 'stat', context: 'context' },
+    prepare({ stat, context }: any) {
+      return { title: `${stat} — ${context}`, subtitle: 'Stat Highlight' }
+    },
+  },
+}
+
+const howToBlock = {
+  type: 'object',
+  name: 'howToBlock',
+  title: 'Step-by-Step / How-To',
+  description: 'Renders as HowTo schema — AI engines and Google extract numbered steps directly.',
+  fields: [
+    { name: 'title', title: 'How-To Title', type: 'string', validation: (Rule: any) => Rule.required() },
+    {
+      name: 'steps',
+      title: 'Steps',
+      type: 'array',
+      of: [
+        {
+          type: 'object',
+          fields: [
+            { name: 'stepName', title: 'Step Name', type: 'string', validation: (Rule: any) => Rule.required() },
+            { name: 'stepDescription', title: 'Step Description', type: 'text', rows: 2, validation: (Rule: any) => Rule.required() },
+            {
+              name: 'stepImage',
+              title: 'Step Image (Optional)',
+              type: 'image',
+              options: { hotspot: true },
+              fields: [{ name: 'alt', title: 'Alt Text', type: 'string' }],
+            },
+          ],
+          preview: {
+            select: { title: 'stepName', subtitle: 'stepDescription' },
+          },
+        },
+      ],
+      validation: (Rule: any) => Rule.required().min(2),
+    },
+  ],
+  preview: {
+    select: { title: 'title', steps: 'steps' },
+    prepare({ title, steps }: any) {
+      return { title: title || 'How-To', subtitle: `${Array.isArray(steps) ? steps.length : 0} steps` }
+    },
+  },
+}
+
+const codeBlock = {
+  type: 'object',
+  name: 'codeBlock',
+  title: 'Code Block',
+  fields: [
+    {
+      name: 'language',
+      title: 'Language',
+      type: 'string',
+      options: {
+        list: [
+          { title: 'JavaScript', value: 'javascript' },
+          { title: 'TypeScript', value: 'typescript' },
+          { title: 'Python', value: 'python' },
+          { title: 'Bash / Shell', value: 'bash' },
+          { title: 'JSON', value: 'json' },
+          { title: 'HTML', value: 'html' },
+          { title: 'CSS', value: 'css' },
+          { title: 'SQL', value: 'sql' },
+          { title: 'Plain Text', value: 'text' },
+        ],
+      },
+      initialValue: 'javascript',
+    },
+    { name: 'filename', title: 'Filename (Optional)', type: 'string' },
+    {
+      name: 'code',
+      title: 'Code',
+      type: 'text',
+      rows: 8,
+      validation: (Rule: any) => Rule.required(),
+    },
+    { name: 'caption', title: 'Caption / Description', type: 'string' },
+  ],
+  preview: {
+    select: { language: 'language', filename: 'filename', caption: 'caption' },
+    prepare({ language, filename, caption }: any) {
+      return { title: filename || caption || 'Code Block', subtitle: language?.toUpperCase() }
+    },
+  },
+}
+
 const ctaBlock = {
   type: 'object',
   name: 'ctaBlock',
@@ -114,8 +235,7 @@ const ctaBlock = {
       name: 'url',
       title: 'URL',
       type: 'url',
-      validation: (Rule: any) =>
-        Rule.required().uri({ scheme: ['http', 'https'] }),
+      validation: (Rule: any) => Rule.required().uri({ scheme: ['http', 'https'] }),
     },
     { name: 'promoCode', title: 'Promo Code', type: 'string' },
     {
@@ -130,16 +250,9 @@ const ctaBlock = {
       },
       initialValue: 'primary',
     },
-    {
-      name: 'isAffiliate',
-      title: 'Affiliate Link?',
-      type: 'boolean',
-      initialValue: true,
-    },
+    { name: 'isAffiliate', title: 'Affiliate Link?', type: 'boolean', initialValue: true },
   ],
-  preview: {
-    select: { title: 'label', subtitle: 'url' },
-  },
+  preview: { select: { title: 'label', subtitle: 'url' } },
 }
 
 const embedBlock = {
@@ -151,7 +264,7 @@ const embedBlock = {
       name: 'url',
       title: 'URL',
       type: 'url',
-      description: 'YouTube, Vimeo, or other embed URL',
+      description: 'YouTube or Vimeo URL',
       validation: (Rule: any) => Rule.required(),
     },
     { name: 'caption', title: 'Caption', type: 'string' },
@@ -232,7 +345,7 @@ const sectionPortableText = {
                 name: 'isAffiliate',
                 title: 'Affiliate Link?',
                 type: 'boolean',
-                description: 'Automatically adds rel="sponsored" and tracks for disclosure.',
+                description: 'Adds rel="sponsored" automatically.',
                 initialValue: false,
               },
               { name: 'openInNewTab', title: 'Open in new tab?', type: 'boolean', initialValue: true },
@@ -251,6 +364,10 @@ const sectionPortableText = {
     },
     tableBlock,
     calloutBlock,
+    pullQuoteBlock,
+    statHighlightBlock,
+    howToBlock,
+    codeBlock,
     ctaBlock,
     embedBlock,
     accordionBlock,
@@ -273,7 +390,7 @@ export const blogSchema = {
   ],
   fields: [
 
-    // ─── CORE CONTENT ──────────────────────────────────────────────────────────
+    // ─── IDENTITY ─────────────────────────────────────────────────────────────
 
     {
       name: 'title',
@@ -339,13 +456,27 @@ export const blogSchema = {
         layout: 'tags',
       },
     },
+
+    // ─── HERO CONTENT (top of article — crawler sees this first) ──────────────
+
+    {
+      name: 'heroImage',
+      title: 'Featured Image',
+      type: 'image',
+      group: 'content',
+      options: { hotspot: true },
+      fields: [
+        { name: 'alt', title: 'Alt Text', type: 'string', validation: (Rule: any) => Rule.required() },
+        { name: 'caption', title: 'Caption', type: 'string' },
+      ],
+    },
     {
       name: 'summary',
-      title: 'Summary / Excerpt',
+      title: 'Summary / TLDR',
       type: 'text',
       rows: 3,
       group: 'content',
-      description: 'Short summary shown in article listings. Used as meta description if no custom one is set. Max 180 chars.',
+      description: 'Short TLDR shown at the top of the article and in listings. Max 300 chars.',
       validation: (Rule: any) => Rule.required().max(300),
     },
     {
@@ -354,9 +485,12 @@ export const blogSchema = {
       type: 'text',
       rows: 5,
       group: 'content',
-      description: 'Opening paragraph that hooks readers and sets context. Displayed directly under the hero image.',
+      description: 'Opening paragraph. Displayed directly under the hero image and TLDR.',
       validation: (Rule: any) => Rule.required(),
     },
+
+    // ─── MAIN BODY ────────────────────────────────────────────────────────────
+
     {
       name: 'contentSections',
       title: 'Content Sections',
@@ -374,14 +508,11 @@ export const blogSchema = {
               name: 'heading',
               title: 'Section Heading (H2)',
               type: 'string',
-              description: 'Main heading for this section',
               validation: (Rule: any) => Rule.required(),
             },
             sectionPortableText,
           ],
-          preview: {
-            select: { title: 'heading' },
-          },
+          preview: { select: { title: 'heading' } },
         },
       ],
     },
@@ -484,18 +615,13 @@ export const blogSchema = {
       title: 'Article FAQs',
       type: 'array',
       group: 'aeo',
-      description: 'Frequently asked questions optimized for FAQPage schema and AI citations. Use 3-15 items.',
+      description: 'Optimized for FAQPage schema and AI citations. Use 3-15 items.',
       of: [
         {
           type: 'object',
           name: 'faq',
           fields: [
-            {
-              name: 'question',
-              title: 'Question',
-              type: 'string',
-              validation: (Rule: any) => Rule.required(),
-            },
+            { name: 'question', title: 'Question', type: 'string', validation: (Rule: any) => Rule.required() },
             {
               name: 'quickAnswer',
               title: 'Quick Answer',
@@ -512,9 +638,7 @@ export const blogSchema = {
               description: 'Complete detailed answer',
             },
           ],
-          preview: {
-            select: { title: 'question', subtitle: 'quickAnswer' },
-          },
+          preview: { select: { title: 'question', subtitle: 'quickAnswer' } },
         },
       ],
     },
@@ -529,32 +653,16 @@ export const blogSchema = {
           type: 'object',
           name: 'toolComparison',
           fields: [
-            {
-              name: 'tool',
-              title: 'Tool',
-              type: 'reference',
-              to: [{ type: 'tool' }],
-            },
-            {
-              name: 'rating',
-              title: 'Rating (out of 5)',
-              type: 'number',
-              validation: (Rule: any) => Rule.min(0).max(5).precision(1),
-            },
+            { name: 'tool', title: 'Tool', type: 'reference', to: [{ type: 'tool' }] },
+            { name: 'rating', title: 'Rating (out of 5)', type: 'number', validation: (Rule: any) => Rule.min(0).max(5).precision(1) },
             { name: 'verdict', title: 'One-line Verdict', type: 'string' },
             { name: 'pros', title: 'Pros', type: 'array', of: [{ type: 'string' }] },
             { name: 'cons', title: 'Cons', type: 'array', of: [{ type: 'string' }] },
             { name: 'pricingLastVerified', title: 'Pricing Last Verified', type: 'date' },
-            {
-              name: 'affiliateLink',
-              title: 'Affiliate Link (for this tool)',
-              type: 'url',
-            },
+            { name: 'affiliateLink', title: 'Affiliate Link (for this tool)', type: 'url' },
             { name: 'promoCode', title: 'Promo Code', type: 'string' },
           ],
-          preview: {
-            select: { title: 'tool.name', subtitle: 'verdict' },
-          },
+          preview: { select: { title: 'tool.name', subtitle: 'verdict' } },
         },
       ],
     },
@@ -563,25 +671,14 @@ export const blogSchema = {
       title: 'Data Sources',
       type: 'array',
       group: 'aeo',
-      description: 'External authoritative sources used in this article. Boosts E-E-A-T signals.',
-      validation: (Rule: any) => Rule.min(1),
+      description: 'External authoritative sources cited in this article. Boosts E-E-A-T.',
       of: [
         {
           type: 'object',
           name: 'dataSource',
           fields: [
-            {
-              name: 'title',
-              title: 'Source Title',
-              type: 'string',
-              validation: (Rule: any) => Rule.required(),
-            },
-            {
-              name: 'url',
-              title: 'URL',
-              type: 'url',
-              validation: (Rule: any) => Rule.required(),
-            },
+            { name: 'title', title: 'Source Title', type: 'string', validation: (Rule: any) => Rule.required() },
+            { name: 'url', title: 'URL', type: 'url', validation: (Rule: any) => Rule.required() },
           ],
           preview: { select: { title: 'title', subtitle: 'url' } },
         },
@@ -598,25 +695,9 @@ export const blogSchema = {
           type: 'object',
           name: 'relatedResource',
           fields: [
-            {
-              name: 'title',
-              title: 'Resource Title',
-              type: 'string',
-              validation: (Rule: any) => Rule.required(),
-            },
-            {
-              name: 'url',
-              title: 'URL',
-              type: 'url',
-              validation: (Rule: any) => Rule.required(),
-            },
-            {
-              name: 'description',
-              title: 'Description',
-              type: 'text',
-              rows: 2,
-              description: 'Brief description of what this resource provides',
-            },
+            { name: 'title', title: 'Resource Title', type: 'string', validation: (Rule: any) => Rule.required() },
+            { name: 'url', title: 'URL', type: 'url', validation: (Rule: any) => Rule.required() },
+            { name: 'description', title: 'Description', type: 'text', rows: 2, description: 'Brief description of what this resource provides' },
             {
               name: 'resourceType',
               title: 'Resource Type',
@@ -633,9 +714,7 @@ export const blogSchema = {
               initialValue: 'external',
             },
           ],
-          preview: {
-            select: { title: 'title', subtitle: 'resourceType' },
-          },
+          preview: { select: { title: 'title', subtitle: 'resourceType' } },
         },
       ],
     },
@@ -691,7 +770,7 @@ export const blogSchema = {
     },
     {
       name: 'commissionTier',
-      title: 'Commission Tier (Internal Only - Never Displayed)',
+      title: 'Commission Tier (Internal Only)',
       type: 'string',
       group: 'affiliate',
       description: 'Internal tracking only. Never rendered on the front end.',
@@ -707,22 +786,6 @@ export const blogSchema = {
 
     // ─── MEDIA ────────────────────────────────────────────────────────────────
 
-    {
-      name: 'heroImage',
-      title: 'Featured Image',
-      type: 'image',
-      group: 'media',
-      options: { hotspot: true },
-      fields: [
-        {
-          name: 'alt',
-          title: 'Alt Text',
-          type: 'string',
-          validation: (Rule: any) => Rule.required(),
-        },
-        { name: 'caption', title: 'Caption', type: 'string' },
-      ],
-    },
     {
       name: 'gallery',
       title: 'Image Gallery',
@@ -745,7 +808,7 @@ export const blogSchema = {
       title: 'YouTube Video URL',
       type: 'url',
       group: 'media',
-      description: 'e.g. https://www.youtube.com/watch?v=xxxxx',
+      description: 'Paste any YouTube URL. Auto-embedded on the article page. e.g. https://www.youtube.com/watch?v=xxxxx',
     },
     {
       name: 'videoTitle',
@@ -778,7 +841,7 @@ export const blogSchema = {
       type: 'text',
       rows: 2,
       group: 'seo',
-      description: 'Custom meta description for search engines. Uses summary if not set. Max 160 chars.',
+      description: 'Custom meta description. Uses summary if not set. Max 160 chars.',
       validation: (Rule: any) => Rule.max(160),
     },
     {
@@ -809,34 +872,12 @@ export const blogSchema = {
     // ─── AUTHORSHIP & FRESHNESS ────────────────────────────────────────────────
 
     {
-      name: 'authorName',
-      title: 'Author Name',
-      type: 'string',
+      name: 'author',
+      title: 'Author',
+      type: 'reference',
+      to: [{ type: 'author' }],
       group: 'meta',
-      description: 'Displayed on the article. e.g. "Verza Editorial Team"',
-      initialValue: 'Verza Editorial Team',
-    },
-    {
-      name: 'authorRole',
-      title: 'Author Role',
-      type: 'string',
-      group: 'meta',
-      description: 'e.g. "Senior AI Tools Analyst", "Founder"',
-    },
-    {
-      name: 'yearsOfExperience',
-      title: 'Years of Experience',
-      type: 'number',
-      group: 'meta',
-    },
-    {
-      name: 'certifications',
-      title: 'Certifications / Credentials',
-      type: 'array',
-      group: 'meta',
-      description: 'Professional certifications held by the author. Boosts E-E-A-T.',
-      of: [{ type: 'string' }],
-      options: { layout: 'tags' },
+      description: 'Select an author. Their name, role, credentials, and bio will auto-populate on the article.',
     },
     {
       name: 'estimatedReadTime',
@@ -888,7 +929,7 @@ export const blogSchema = {
     select: {
       title: 'title',
       articleType: 'articleType',
-      authorName: 'authorName',
+      authorName: 'author.name',
       media: 'heroImage',
     },
     prepare({ title, articleType, authorName, media }: any) {
@@ -902,7 +943,7 @@ export const blogSchema = {
       }
       return {
         title,
-        subtitle: `${typeLabel[articleType] || 'ARTICLE'} — ${authorName || 'No author'}`,
+        subtitle: `${typeLabel[articleType] || 'ARTICLE'} — ${authorName || 'No author set'}`,
         media,
       }
     },
