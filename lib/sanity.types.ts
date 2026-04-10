@@ -184,6 +184,97 @@ export interface BlogContentSection {
   content: any // Portable Text
 }
 
+// ─── SITE SETTINGS ──────────────────────────────────────────────────────────
+
+export interface SiteStat {
+  value: string
+  label: string
+}
+
+export interface SiteSettings {
+  _id: string
+  _type: 'siteSettings'
+  siteName: string
+  tagline?: string
+  logo?: SanityImage
+  // Hero
+  heroHeadline?: string
+  heroSubheadline?: string
+  heroPrimaryCtaLabel?: string
+  heroPrimaryCtaLink?: string
+  heroSecondaryCtaLabel?: string
+  heroSecondaryCtaLink?: string
+  // Stats bar
+  statsEnabled?: boolean
+  stats?: SiteStat[]
+  // Homepage section toggles
+  showCategoriesSection?: boolean
+  categoriesSectionHeading?: string
+  categoriesSectionSubheading?: string
+  showFeaturedToolsSection?: boolean
+  featuredToolsHeading?: string
+  featuredToolsSubheading?: string
+  // Bottom CTA
+  bottomCtaHeading?: string
+  bottomCtaBody?: string
+  bottomCtaButtonLabel?: string
+  bottomCtaButtonLink?: string
+  // Contact + social
+  contactEmail?: string
+  socialLinks?: {
+    twitter?: string
+    linkedin?: string
+    youtube?: string
+    instagram?: string
+    facebook?: string
+    tiktok?: string
+  }
+  // Legal + trust
+  affiliateDisclosureText?: string
+  cookieBannerText?: string
+  copyrightText?: string
+  // SEO
+  defaultMetaDescription?: string
+  defaultOgImage?: SanityImage
+}
+
+// ─── NAVIGATION ─────────────────────────────────────────────────────────────
+
+export interface NavLink {
+  label: string
+  href: string
+  openInNewTab?: boolean
+}
+
+export interface NavItem {
+  label: string
+  href?: string
+  openInNewTab?: boolean
+  isBlogDropdown?: boolean
+  dropdown?: NavLink[]
+}
+
+export interface FooterColumn {
+  heading: string
+  links: NavLink[]
+}
+
+export interface Navigation {
+  _id: string
+  _type: 'navigation'
+  title?: string
+  // Header
+  headerItems?: NavItem[]
+  headerCtaEnabled?: boolean
+  headerCtaLabel?: string
+  headerCtaLink?: string
+  headerCtaStyle?: 'primary' | 'outline' | 'ghost'
+  // Footer
+  footerTagline?: string
+  footerColumns?: FooterColumn[]
+  footerBottomLinks?: NavLink[]
+}
+
 export interface Blog {
   _id: string
   _type: 'blog'
