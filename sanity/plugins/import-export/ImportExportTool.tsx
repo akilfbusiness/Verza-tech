@@ -39,25 +39,24 @@ function collectPlaceholders(obj: any, path = ''): PlaceholderWarning[] {
   return warnings
 }
 
-// Strip _instructions fields, and strip any object that contains an unresolved _ref placeholder
-function sanitizeForImport(obj: any): any {
+// Prepare document for import:
+// - Removes _instructions fields (template guidance, not real data)
+// - Marks any reference with a placeholder _ref as _weak: true
+//   so Sanity accepts the import even if the referenced document doesn't exist yet.
+//   Weak refs show as "broken link" in Studio — you click and swap in the real document later.
+function prepareForImport(obj: any): any {
   if (Array.isArray(obj)) {
-    return obj
-      .map(sanitizeForImport)
-      .filter((item) => item !== null) // remove stripped reference objects
+    return obj.map(prepareForImport)
   }
   if (obj && typeof obj === 'object') {
-    // If this object is a reference with a placeholder _ref, drop the whole object
+    // Reference with a placeholder _ref — mark as weak so Sanity doesn't reject it
     if (obj._type === 'reference' && obj._ref && isPlaceholder(obj._ref)) {
-      return null
+      return { ...obj, _weak: true }
     }
     const cleaned: any = {}
     for (const key of Object.keys(obj)) {
       if (key === '_instructions') continue
-      const sanitized = sanitizeForImport(obj[key])
-      // Skip null values returned from stripped references
-      if (sanitized === null && key !== '_ref') continue
-      cleaned[key] = sanitized
+      cleaned[key] = prepareForImport(obj[key])
     }
     return cleaned
   }
@@ -114,10 +113,10 @@ export function ImportExportTool() {
     }
 
     const found = collectPlaceholders(parsed)
-    const sanitized = sanitizeForImport(parsed)
+    const prepared = prepareForImport(parsed)
 
     setWarnings(found)
-    setPreviewData(sanitized)
+    setPreviewData(prepared)
     setUnderstood(false)
     setStatus('previewing')
     setMessage('')
@@ -235,7 +234,8 @@ export function ImportExportTool() {
               <Text muted size={1}>
                 Paste the completed JSON from your AI below, then click Review & Import.
                 Any unfilled placeholder references (e.g. unlinked authors, tools, categories) will be
-                automatically stripped — you can connect them later inside Sanity.
+                imported as-is and shown as broken links inside Sanity — you can swap them for real
+                documents later without losing any of your content.
               </Text>
               <TextArea
                 value={importJson}
@@ -323,17 +323,18 @@ export function ImportExportTool() {
               {warnings.length > 0 && (
                 <Card padding={4} radius={2} tone="caution">
                   <Stack space={3}>
-                    <Flex align="center" gap={2}>
-                      <WarningOutlineIcon style={{ width: 16, height: 16 }} />
-                      <Text weight="semibold" size={2}>
-                        {warnings.length} unfilled placeholder{warnings.length > 1 ? 's' : ''} detected — these fields will be left blank
-                      </Text>
-                    </Flex>
-                    <Text muted size={1}>
-                      These are references to documents that do not exist yet (authors, tools, categories, etc.).
-                      They have been safely removed so the import can proceed. You can link them later by
-                      editing the document directly in Sanity.
+                  <Flex align="center" gap={2}>
+                    <WarningOutlineIcon style={{ width: 16, height: 16 }} />
+                    <Text weight="semibold" size={2}>
+                      {warnings.length} unfilled placeholder{warnings.length > 1 ? 's' : ''} detected — these will import as broken links
                     </Text>
+                  </Flex>
+                  <Text muted size={1}>
+                    These are references to documents that do not exist yet (authors, tools, categories, etc.).
+                    They will be imported with your placeholder text intact and shown as broken links inside
+                    Sanity Studio. Once you create the real document (e.g. an Author or Tool), open this
+                    draft, click the broken link field, and swap it in. Nothing is lost or removed.
+                  </Text>
                     <Stack space={2}>
                       {warnings.map((w, i) => (
                         <Card key={i} padding={3} radius={2} tone="caution">
@@ -355,7 +356,7 @@ export function ImportExportTool() {
                         onChange={(e) => setUnderstood((e.target as HTMLInputElement).checked)}
                       />
                       <Label htmlFor="understood" size={2}>
-                        I understand these fields will be blank — I will fill them in later inside Sanity
+                        I understand these references are placeholders — I will replace them with real documents inside Sanity later
                       </Label>
                     </Flex>
                   </Stack>
