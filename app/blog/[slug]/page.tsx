@@ -123,7 +123,7 @@ function extractHowToSteps(contentSections: any[]): { heading: string; text?: st
     for (const block of section.content || []) {
       if (block._type === 'howToBlock' && Array.isArray(block.steps)) {
         for (const step of block.steps) {
-          steps.push({ heading: step.title || step.heading || '', text: step.description })
+          steps.push({ heading: step.stepName || step.title || step.heading || '', text: step.stepDescription || step.description })
         }
       }
     }
@@ -362,9 +362,18 @@ export default async function BlogArticlePage({ params }: Props) {
             />
           )}
 
-          {/* 4. Introduction */}
+          {/* 4. Article Answer Capsule — AEO direct answer, pulled verbatim by AI engines */}
+          {post.articleAnswerCapsule && (
+            <div className="mt-6 px-5 py-4 rounded-xl border-l-4 border-primary bg-primary/5">
+              <p className="text-base font-medium leading-relaxed text-foreground">
+                {post.articleAnswerCapsule}
+              </p>
+            </div>
+          )}
+
+          {/* 5. Introduction */}
           {post.introduction && (
-            <div className="mt-8 text-lg leading-relaxed text-foreground">
+            <div className="mt-6 text-lg leading-relaxed text-foreground">
               <p>{post.introduction}</p>
             </div>
           )}
@@ -396,7 +405,12 @@ export default async function BlogArticlePage({ params }: Props) {
               {post.contentSections.map((section: any, i: number) => (
                 <section key={i} id={`section-${i}`} className="scroll-mt-20">
                   {section.heading && (
-                    <h2 className="text-2xl font-bold mt-10 mb-4 text-balance">{section.heading}</h2>
+                    <h2 className="text-2xl font-bold mt-10 mb-3 text-balance">{section.heading}</h2>
+                  )}
+                  {section.sectionAnswerCapsule && (
+                    <p className="mb-4 text-base text-muted-foreground italic border-l-2 border-primary/40 pl-4 leading-relaxed">
+                      {section.sectionAnswerCapsule}
+                    </p>
                   )}
                   <PortableText value={section.content} />
                 </section>
@@ -404,7 +418,39 @@ export default async function BlogArticlePage({ params }: Props) {
             </article>
           ) : null}
 
-          {/* 7. Tools compared */}
+          {/* 7. Decision Framework */}
+          {post.decisionFramework?.steps?.length > 0 && (
+            <section className="my-10 border rounded-xl p-6 bg-secondary/30" aria-label="Decision framework">
+              {post.decisionFramework.frameworkName && (
+                <h2 className="text-xl font-bold mb-5 text-balance">
+                  {post.decisionFramework.frameworkName}
+                </h2>
+              )}
+              <ol className="space-y-4">
+                {post.decisionFramework.steps.map((step: any, i: number) => (
+                  <li key={i} className="flex gap-4">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">
+                      {i + 1}
+                    </div>
+                    <div>
+                      <p className="font-semibold">{step.stepTitle}</p>
+                      <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{step.stepDescription}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          )}
+
+          {/* 8. Data Provenance */}
+          {post.dataProvenance && (
+            <div className="my-6 flex items-start gap-3 px-4 py-3 rounded-lg border bg-muted/40 text-sm text-muted-foreground">
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mt-0.5 flex-shrink-0 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              <span>{post.dataProvenance}</span>
+            </div>
+          )}
+
+          {/* 9. Tools compared */}
           {post.toolsCompared?.length > 0 && (
             <section className="my-10" aria-label="Tools compared">
               <h2 className="text-2xl font-bold mb-6">Tools Compared</h2>

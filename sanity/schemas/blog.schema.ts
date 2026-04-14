@@ -510,6 +510,14 @@ export const blogSchema = {
               type: 'string',
               validation: (Rule: any) => Rule.required(),
             },
+            {
+              name: 'sectionAnswerCapsule',
+              title: 'Section Answer Capsule',
+              type: 'text',
+              rows: 2,
+              description: 'A 20-40 word direct answer to what this section covers. AI engines extract this for section-level citations. Appears directly under the H2.',
+              validation: (Rule: any) => Rule.max(300),
+            },
             sectionPortableText,
           ],
           preview: { select: { title: 'heading' } },
@@ -519,6 +527,55 @@ export const blogSchema = {
 
     // ─── AEO / AI OPTIMISATION ─────────────────────────────────────────────────
 
+    {
+      name: 'articleAnswerCapsule',
+      title: 'Article Answer Capsule',
+      type: 'text',
+      rows: 2,
+      group: 'aeo',
+      description: 'A 20-25 word direct answer to the article\'s core question. This is the single most important AEO field — AI engines pull this verbatim when citing your article. Place it directly under the H1.',
+      validation: (Rule: any) => Rule.max(200),
+    },
+    {
+      name: 'decisionFramework',
+      title: 'Decision Framework',
+      type: 'object',
+      group: 'aeo',
+      description: 'A branded, structured framework that helps readers make a decision. Renders as a named process with steps — AI engines cite named frameworks directly.',
+      fields: [
+        {
+          name: 'frameworkName',
+          title: 'Framework Name',
+          type: 'string',
+          description: 'e.g. "The Verza Stack Audit", "The 4-Point Tool Evaluation", "The Verza Selection Method"',
+        },
+        {
+          name: 'steps',
+          title: 'Framework Steps',
+          type: 'array',
+          of: [
+            {
+              type: 'object',
+              fields: [
+                { name: 'stepTitle', title: 'Step Title', type: 'string', validation: (Rule: any) => Rule.required() },
+                { name: 'stepDescription', title: 'Step Description', type: 'text', rows: 2, validation: (Rule: any) => Rule.required() },
+              ],
+              preview: { select: { title: 'stepTitle', subtitle: 'stepDescription' } },
+            },
+          ],
+          validation: (Rule: any) => Rule.min(2).max(8),
+        },
+      ],
+    },
+    {
+      name: 'dataProvenance',
+      title: 'Data Provenance',
+      type: 'text',
+      rows: 2,
+      group: 'aeo',
+      description: 'One sentence explaining how the data in this article was gathered. e.g. "Based on hands-on testing of 12 tools over 3 months, last verified April 2026." Renders as a visible trust badge.',
+      validation: (Rule: any) => Rule.max(300),
+    },
     {
       name: 'verdictBox',
       title: 'Verdict Box',

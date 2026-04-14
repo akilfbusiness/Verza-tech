@@ -312,11 +312,18 @@ const blogListFragment = `
 
 const blogFullFragment = `
   ${blogListFragment},
+  articleAnswerCapsule,
   introduction,
   contentSections[] {
     heading,
+    sectionAnswerCapsule,
     content
   },
+  decisionFramework {
+    frameworkName,
+    steps[] { stepTitle, stepDescription }
+  },
+  dataProvenance,
   faqs,
   toolsCompared[] {
     tool-> {
