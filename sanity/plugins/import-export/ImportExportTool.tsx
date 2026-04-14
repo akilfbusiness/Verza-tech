@@ -2,11 +2,67 @@
 
 import { useState, useCallback } from 'react'
 import { useClient } from 'sanity'
-import { Card, Stack, Text, Button, Select, Flex, Badge, Spinner, TextArea, Heading, Box } from '@sanity/ui'
-import { DownloadIcon, UploadIcon, CheckmarkIcon, ErrorOutlineIcon } from '@sanity/icons'
+import { Card, Stack, Text, Button, Select, Flex, Badge, Spinner, TextArea, Heading, Box, Checkbox, Label } from '@sanity/ui'
+import { DownloadIcon, UploadIcon, CheckmarkIcon, ErrorOutlineIcon, WarningOutlineIcon } from '@sanity/icons'
 import { DOCUMENT_TYPES, templates } from './templates'
 
-type Status = 'idle' | 'loading' | 'success' | 'error'
+type Status = 'idle' | 'previewing' | 'loading' | 'success' | 'error'
+
+interface PlaceholderWarning {
+  field: string
+  value: string
+}
+
+// Detects placeholder strings — any all-caps token like AUTHOR_ID_HERE, TOOL_SERANKING_ID, etc.
+const PLACEHOLDER_PATTERN = /^[A-Z][A-Z0-9_]*(?:_ID|_HERE|_REF|_ID_HERE).*$/
+
+function isPlaceholder(value: string): boolean {
+  return typeof value === 'string' && PLACEHOLDER_PATTERN.test(value.trim())
+}
+
+// Walk the entire JSON tree and collect every placeholder found, with its field path
+function collectPlaceholders(obj: any, path = ''): PlaceholderWarning[] {
+  const warnings: PlaceholderWarning[] = []
+  if (Array.isArray(obj)) {
+    obj.forEach((item, i) => warnings.push(...collectPlaceholders(item, `${path}[${i}]`)))
+  } else if (obj && typeof obj === 'object') {
+    for (const key of Object.keys(obj)) {
+      const val = obj[key]
+      const currentPath = path ? `${path}.${key}` : key
+      if (typeof val === 'string' && isPlaceholder(val)) {
+        warnings.push({ field: currentPath, value: val })
+      } else {
+        warnings.push(...collectPlaceholders(val, currentPath))
+      }
+    }
+  }
+  return warnings
+}
+
+// Strip _instructions fields, and strip any object that contains an unresolved _ref placeholder
+function sanitizeForImport(obj: any): any {
+  if (Array.isArray(obj)) {
+    return obj
+      .map(sanitizeForImport)
+      .filter((item) => item !== null) // remove stripped reference objects
+  }
+  if (obj && typeof obj === 'object') {
+    // If this object is a reference with a placeholder _ref, drop the whole object
+    if (obj._type === 'reference' && obj._ref && isPlaceholder(obj._ref)) {
+      return null
+    }
+    const cleaned: any = {}
+    for (const key of Object.keys(obj)) {
+      if (key === '_instructions') continue
+      const sanitized = sanitizeForImport(obj[key])
+      // Skip null values returned from stripped references
+      if (sanitized === null && key !== '_ref') continue
+      cleaned[key] = sanitized
+    }
+    return cleaned
+  }
+  return obj
+}
 
 export function ImportExportTool() {
   const client = useClient({ apiVersion: '2024-01-01' })
@@ -16,12 +72,14 @@ export function ImportExportTool() {
   const [status, setStatus] = useState<Status>('idle')
   const [message, setMessage] = useState('')
   const [createdId, setCreatedId] = useState('')
+  const [warnings, setWarnings] = useState<PlaceholderWarning[]>([])
+  const [previewData, setPreviewData] = useState<any>(null)
+  const [understood, setUnderstood] = useState(false)
 
   // ─── EXPORT TEMPLATE ────────────────────────────────────────────────────────
   const handleExportTemplate = useCallback(() => {
     const template = templates[selectedType]
     if (!template) return
-
     const json = JSON.stringify(template, null, 2)
     const blob = new Blob([json], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
@@ -32,8 +90,8 @@ export function ImportExportTool() {
     URL.revokeObjectURL(url)
   }, [selectedType])
 
-  // ─── IMPORT JSON ────────────────────────────────────────────────────────────
-  const handleImport = useCallback(async () => {
+  // ─── STEP 1: VALIDATE + PREVIEW ─────────────────────────────────────────────
+  const handlePreview = useCallback(() => {
     if (!importJson.trim()) {
       setStatus('error')
       setMessage('Please paste your filled JSON before importing.')
@@ -49,49 +107,59 @@ export function ImportExportTool() {
       return
     }
 
-    // Strip _instructions fields recursively
-    const strip = (obj: any): any => {
-      if (Array.isArray(obj)) return obj.map(strip)
-      if (obj && typeof obj === 'object') {
-        const cleaned: any = {}
-        for (const key of Object.keys(obj)) {
-          if (key === '_instructions') continue
-          cleaned[key] = strip(obj[key])
-        }
-        return cleaned
-      }
-      return obj
-    }
-
-    const cleaned = strip(parsed)
-
-    if (!cleaned._type) {
+    if (!parsed._type) {
       setStatus('error')
       setMessage('JSON is missing the "_type" field. Make sure you did not remove it.')
       return
     }
+
+    const found = collectPlaceholders(parsed)
+    const sanitized = sanitizeForImport(parsed)
+
+    setWarnings(found)
+    setPreviewData(sanitized)
+    setUnderstood(false)
+    setStatus('previewing')
+    setMessage('')
+  }, [importJson])
+
+  // ─── STEP 2: CONFIRM + IMPORT ───────────────────────────────────────────────
+  const handleConfirmImport = useCallback(async () => {
+    if (!previewData) return
 
     setStatus('loading')
     setMessage('')
     setCreatedId('')
 
     try {
-      const result = await client.create(cleaned)
+      const result = await client.create(previewData)
       setStatus('success')
       setCreatedId(result._id)
       setMessage(`Document created successfully! ID: ${result._id}`)
       setImportJson('')
+      setPreviewData(null)
+      setWarnings([])
     } catch (err: any) {
       setStatus('error')
       setMessage(err?.message || 'Failed to create document. Check your JSON fields match the schema.')
     }
-  }, [importJson, client])
+  }, [previewData, client])
 
   const handleClearImport = () => {
     setImportJson('')
     setStatus('idle')
     setMessage('')
     setCreatedId('')
+    setWarnings([])
+    setPreviewData(null)
+    setUnderstood(false)
+  }
+
+  const handleBackToEdit = () => {
+    setStatus('idle')
+    setWarnings([])
+    setPreviewData(null)
+    setUnderstood(false)
   }
 
   return (
@@ -156,45 +224,167 @@ export function ImportExportTool() {
           </Stack>
         </Card>
 
-        {/* Import Section */}
-        <Card padding={4} radius={3} shadow={1}>
-          <Stack space={4}>
-            <Flex align="center" gap={3}>
-              <UploadIcon style={{ width: 20, height: 20 }} />
-              <Text weight="semibold" size={2}>Step 3 — Import Filled JSON</Text>
-            </Flex>
-            <Text muted size={1}>
-              Paste the completed JSON from your AI below, then click Import. The document will be instantly created in Sanity — ready to review and publish.
-            </Text>
-            <TextArea
-              value={importJson}
-              onChange={(e) => setImportJson((e.target as HTMLTextAreaElement).value)}
-              placeholder={`Paste your filled ${DOCUMENT_TYPES.find(d => d.value === selectedType)?.label} JSON here...`}
-              rows={14}
-              style={{ fontFamily: 'monospace', fontSize: 12 }}
-            />
-            <Flex gap={3}>
-              <Button
-                icon={UploadIcon}
-                text="Import Document"
-                tone="positive"
-                mode="default"
-                onClick={handleImport}
-                disabled={status === 'loading'}
+        {/* Import Section — only show when not in preview/loading/success */}
+        {(status === 'idle' || status === 'error') && (
+          <Card padding={4} radius={3} shadow={1}>
+            <Stack space={4}>
+              <Flex align="center" gap={3}>
+                <UploadIcon style={{ width: 20, height: 20 }} />
+                <Text weight="semibold" size={2}>Step 3 — Import Filled JSON</Text>
+              </Flex>
+              <Text muted size={1}>
+                Paste the completed JSON from your AI below, then click Review & Import.
+                Any unfilled placeholder references (e.g. unlinked authors, tools, categories) will be
+                automatically stripped — you can connect them later inside Sanity.
+              </Text>
+              <TextArea
+                value={importJson}
+                onChange={(e) => setImportJson((e.target as HTMLTextAreaElement).value)}
+                placeholder={`Paste your filled ${DOCUMENT_TYPES.find(d => d.value === selectedType)?.label} JSON here...`}
+                rows={14}
+                style={{ fontFamily: 'monospace', fontSize: 12 }}
               />
-              {importJson && (
+              <Flex gap={3}>
                 <Button
-                  text="Clear"
-                  mode="ghost"
-                  tone="critical"
-                  onClick={handleClearImport}
+                  icon={UploadIcon}
+                  text="Review & Import"
+                  tone="positive"
+                  mode="default"
+                  onClick={handlePreview}
                 />
-              )}
-            </Flex>
-          </Stack>
-        </Card>
+                {importJson && (
+                  <Button
+                    text="Clear"
+                    mode="ghost"
+                    tone="critical"
+                    onClick={handleClearImport}
+                  />
+                )}
+              </Flex>
+            </Stack>
+          </Card>
+        )}
 
-        {/* Status Messages */}
+        {/* Error Message */}
+        {status === 'error' && (
+          <Card padding={4} radius={3} tone="critical">
+            <Flex align="center" gap={3}>
+              <ErrorOutlineIcon style={{ width: 20, height: 20 }} />
+              <Stack space={2}>
+                <Text weight="semibold" size={2}>Import failed</Text>
+                <Text size={1} muted>{message}</Text>
+              </Stack>
+            </Flex>
+          </Card>
+        )}
+
+        {/* ── STEP 2: CONFIRMATION PANEL ─────────────────────────────────────── */}
+        {status === 'previewing' && previewData && (
+          <Card padding={5} radius={3} shadow={2} tone="default">
+            <Stack space={5}>
+
+              <Stack space={2}>
+                <Heading size={2}>Confirm Import</Heading>
+                <Text muted size={2}>
+                  Review what will be created before confirming. This document will be saved as a
+                  draft — you can review and publish it from the sidebar.
+                </Text>
+              </Stack>
+
+              {/* What will be created */}
+              <Card padding={4} radius={2} tone="positive">
+                <Stack space={3}>
+                  <Flex align="center" gap={2}>
+                    <CheckmarkIcon style={{ width: 16, height: 16 }} />
+                    <Text weight="semibold" size={2}>Will be created</Text>
+                  </Flex>
+                  <Stack space={2}>
+                    <Flex gap={2} align="center">
+                      <Text size={1} muted>Document type:</Text>
+                      <Badge tone="positive" mode="outline" fontSize={1}>{previewData._type}</Badge>
+                    </Flex>
+                    {previewData.title && (
+                      <Flex gap={2} align="center">
+                        <Text size={1} muted>Title:</Text>
+                        <Text size={1} weight="semibold">{previewData.title}</Text>
+                      </Flex>
+                    )}
+                    {previewData.slug?.current && (
+                      <Flex gap={2} align="center">
+                        <Text size={1} muted>Slug:</Text>
+                        <Text size={1} style={{ fontFamily: 'monospace' }}>{previewData.slug.current}</Text>
+                      </Flex>
+                    )}
+                  </Stack>
+                </Stack>
+              </Card>
+
+              {/* Placeholder warnings */}
+              {warnings.length > 0 && (
+                <Card padding={4} radius={2} tone="caution">
+                  <Stack space={3}>
+                    <Flex align="center" gap={2}>
+                      <WarningOutlineIcon style={{ width: 16, height: 16 }} />
+                      <Text weight="semibold" size={2}>
+                        {warnings.length} unfilled placeholder{warnings.length > 1 ? 's' : ''} detected — these fields will be left blank
+                      </Text>
+                    </Flex>
+                    <Text muted size={1}>
+                      These are references to documents that do not exist yet (authors, tools, categories, etc.).
+                      They have been safely removed so the import can proceed. You can link them later by
+                      editing the document directly in Sanity.
+                    </Text>
+                    <Stack space={2}>
+                      {warnings.map((w, i) => (
+                        <Card key={i} padding={3} radius={2} tone="caution">
+                          <Flex gap={3} align="center">
+                            <Text size={1} style={{ fontFamily: 'monospace', opacity: 0.7, minWidth: 200 }}>
+                              {w.field}
+                            </Text>
+                            <Badge tone="caution" mode="outline" fontSize={0}>{w.value}</Badge>
+                          </Flex>
+                        </Card>
+                      ))}
+                    </Stack>
+
+                    {/* Acknowledgement checkbox */}
+                    <Flex align="center" gap={3} style={{ paddingTop: 8 }}>
+                      <Checkbox
+                        id="understood"
+                        checked={understood}
+                        onChange={(e) => setUnderstood((e.target as HTMLInputElement).checked)}
+                      />
+                      <Label htmlFor="understood" size={2}>
+                        I understand these fields will be blank — I will fill them in later inside Sanity
+                      </Label>
+                    </Flex>
+                  </Stack>
+                </Card>
+              )}
+
+              {/* Action buttons */}
+              <Flex gap={3}>
+                <Button
+                  icon={UploadIcon}
+                  text="Confirm & Import"
+                  tone="positive"
+                  mode="default"
+                  onClick={handleConfirmImport}
+                  disabled={warnings.length > 0 && !understood}
+                />
+                <Button
+                  text="Go Back & Edit"
+                  mode="ghost"
+                  tone="default"
+                  onClick={handleBackToEdit}
+                />
+              </Flex>
+
+            </Stack>
+          </Card>
+        )}
+
+        {/* Loading */}
         {status === 'loading' && (
           <Card padding={4} radius={3} tone="primary">
             <Flex align="center" gap={3}>
@@ -204,6 +394,7 @@ export function ImportExportTool() {
           </Card>
         )}
 
+        {/* Success */}
         {status === 'success' && (
           <Card padding={4} radius={3} tone="positive">
             <Stack space={3}>
@@ -215,25 +406,22 @@ export function ImportExportTool() {
                 Go to the{' '}
                 <strong>{DOCUMENT_TYPES.find(d => d.value === selectedType)?.label}</strong>{' '}
                 tab in the sidebar to find your new document, review all fields, and publish it.
+                Any blank reference fields can be filled in there.
               </Text>
               {createdId && (
                 <Badge tone="positive" mode="outline" fontSize={1}>
                   ID: {createdId}
                 </Badge>
               )}
+              <Box>
+                <Button
+                  text="Import Another Document"
+                  mode="ghost"
+                  tone="default"
+                  onClick={handleClearImport}
+                />
+              </Box>
             </Stack>
-          </Card>
-        )}
-
-        {status === 'error' && (
-          <Card padding={4} radius={3} tone="critical">
-            <Flex align="center" gap={3}>
-              <ErrorOutlineIcon style={{ width: 20, height: 20 }} />
-              <Stack space={2}>
-                <Text weight="semibold" size={2}>Import failed</Text>
-                <Text size={1} muted>{message}</Text>
-              </Stack>
-            </Flex>
           </Card>
         )}
 
