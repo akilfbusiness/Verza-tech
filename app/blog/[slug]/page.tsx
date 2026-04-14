@@ -11,7 +11,7 @@ import { AffiliateCTA } from '@/components/blog/affiliate-cta'
 import { PortableText } from '@/components/blog/portable-text'
 import { ReadingProgress } from '@/components/blog/reading-progress'
 import { NewsletterCTA } from '@/components/blog/newsletter-cta'
-import { generateBreadcrumbSchema, generateHowToSchema, renderJsonLd } from '@/lib/schema'
+import { generateBreadcrumbSchema, generateHowToSchema, generateSpeakableSchema, renderJsonLd } from '@/lib/schema'
 
 export const revalidate = 60
 export const dynamicParams = true
@@ -67,19 +67,24 @@ function getYouTubeId(url: string): string | null {
 }
 
 function generateBlogArticleSchema(post: any, siteUrl: string) {
+  const articleUrl = `${siteUrl}/blog/${post.slug.current}`
+
   const schema: any = {
     '@context': 'https://schema.org',
     '@type': 'Article',
+    '@id': `${articleUrl}#article`,
     headline: post.title,
     description: post.summary,
+    inLanguage: 'en',
     datePublished: post.publishedAt,
     dateModified: post.updatedAt || post.publishedAt,
     mainEntityOfPage: {
       '@type': 'WebPage',
-      '@id': `${siteUrl}/blog/${post.slug.current}`,
+      '@id': articleUrl,
     },
     publisher: {
       '@type': 'Organization',
+      '@id': `${siteUrl}/#organization`,
       name: 'Verza',
       url: siteUrl,
       logo: { '@type': 'ImageObject', url: `${siteUrl}/logo.png` },
@@ -88,6 +93,7 @@ function generateBlogArticleSchema(post: any, siteUrl: string) {
       ? urlForImage(post.heroImage).width(1200).height(630).url()
       : `${siteUrl}/api/og?title=${encodeURIComponent(post.title)}`,
   }
+
   if (post.author) {
     schema.author = {
       '@type': 'Person',
@@ -97,8 +103,31 @@ function generateBlogArticleSchema(post: any, siteUrl: string) {
       ...(post.author.yearsOfExperience && {
         description: `${post.author.yearsOfExperience}+ years of experience`,
       }),
+      ...(post.author.socialLinks?.linkedin && {
+        sameAs: [post.author.socialLinks.linkedin].filter(Boolean),
+      }),
     }
   }
+
+  // about — what entities this article is primarily about (categories + primary tool)
+  const aboutEntities: any[] = []
+  if (post.categories?.length) {
+    aboutEntities.push(...post.categories.map((cat: any) => ({
+      '@type': 'Thing',
+      name: cat.name,
+    })))
+  }
+  if (aboutEntities.length > 0) schema.about = aboutEntities
+
+  // mentions — specific tools/software the article references
+  if (post.toolsCompared?.length) {
+    schema.mentions = post.toolsCompared.map((tool: any) => ({
+      '@type': 'SoftwareApplication',
+      name: tool.name,
+      ...(tool.website && { url: tool.website }),
+    }))
+  }
+
   return schema
 }
 
@@ -175,6 +204,11 @@ export default async function BlogArticlePage({ params }: Props) {
   const howToSchema = howToSteps.length > 0
     ? generateHowToSchema(post.title, post.summary || '', howToSteps, `${siteUrl}/blog/${post.slug.current}`)
     : null
+
+  const speakableSelectors = ['h1', '#article-answer-capsule']
+  if (post.summary) speakableSelectors.push('#article-summary')
+  const speakableSchema = generateSpeakableSchema(`${siteUrl}/blog/${post.slug.current}`, speakableSelectors)
+
   const breadcrumbItems = [
     { name: 'Home', url: siteUrl },
     { name: 'Blog', url: `${siteUrl}/blog` },
@@ -192,6 +226,7 @@ export default async function BlogArticlePage({ params }: Props) {
       {faqSchema && renderJsonLd(faqSchema)}
       {videoSchema && renderJsonLd(videoSchema)}
       {howToSchema && renderJsonLd(howToSchema)}
+      {renderJsonLd(speakableSchema)}
       {renderJsonLd(breadcrumbSchema)}
 
       <ReadingProgress />
@@ -237,7 +272,7 @@ export default async function BlogArticlePage({ params }: Props) {
 
             {/* Summary / TLDR */}
             {post.summary && (
-              <p className="text-lg text-muted-foreground leading-relaxed mb-5">
+              <p id="article-summary" className="text-lg text-muted-foreground leading-relaxed mb-5">
                 {post.summary}
               </p>
             )}
@@ -364,7 +399,7 @@ export default async function BlogArticlePage({ params }: Props) {
 
           {/* 4. Article Answer Capsule — AEO direct answer, pulled verbatim by AI engines */}
           {post.articleAnswerCapsule && (
-            <div className="mt-6 px-5 py-4 rounded-xl border-l-4 border-primary bg-primary/5">
+            <div id="article-answer-capsule" className="mt-6 px-5 py-4 rounded-xl border-l-4 border-primary bg-primary/5">
               <p className="text-base font-medium leading-relaxed text-foreground">
                 {post.articleAnswerCapsule}
               </p>
