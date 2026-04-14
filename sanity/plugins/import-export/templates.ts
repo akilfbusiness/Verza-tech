@@ -32,11 +32,13 @@ export const templates: Record<string, object> = {
       caption: 'Optional image caption or credit.',
     },
     summary: '[REQUIRED] Short TLDR shown at top of article and in listings. Max 300 chars.',
+    articleAnswerCapsule: '[REQUIRED for AEO] 20-25 word direct answer to the article\'s core question. This is the single most important AEO field — AI engines pull this verbatim when citing the article. Reads as a standalone sentence.',
     introduction: '[REQUIRED] Opening paragraph that hooks readers and sets context.',
     contentSections: [
       {
         _type: 'contentSection',
         heading: '[REQUIRED] Section H2 heading',
+        sectionAnswerCapsule: 'A 20-40 word direct answer to what this section covers. AI engines extract this for section-level citations. Should read as a standalone answer to the heading.',
         content: [
           {
             _type: 'block',
@@ -47,6 +49,15 @@ export const templates: Record<string, object> = {
         ],
       }
     ],
+    decisionFramework: {
+      _instructions: 'A branded, named framework that helps readers make a decision. AI engines cite named frameworks directly. Remove _instructions before importing.',
+      frameworkName: 'e.g. "The Verza Stack Audit" | "The 4-Point Tool Evaluation" | "The Verza Selection Method"',
+      steps: [
+        { stepTitle: '[REQUIRED] Step 1 title', stepDescription: '[REQUIRED] What the reader does or considers in this step.' },
+        { stepTitle: '[REQUIRED] Step 2 title', stepDescription: '[REQUIRED] What the reader does or considers in this step.' },
+      ],
+    },
+    dataProvenance: 'One sentence on how the data was gathered. e.g. "Based on hands-on testing of 12 tools over 3 months, last verified April 2026." Renders as a visible trust badge.',
     verdictBox: {
       summary: 'One-line verdict. e.g. "The best AI writing tool for content creators in 2026."',
       rating: 4.5,
