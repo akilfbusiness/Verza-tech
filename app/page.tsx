@@ -85,7 +85,14 @@ export default async function HomePage() {
   const bottomCtaLabel   = siteSettings?.bottomCtaButtonLabel || 'Learn More About Verza'
   const bottomCtaLink    = siteSettings?.bottomCtaButtonLink  || '/about'
 
+  const orgSchema = generateOrganizationSchema(siteSettings)
+  const websiteSchema = generateWebsiteSchema()
+
   return (
+    <>
+      {renderJsonLd(orgSchema)}
+      {renderJsonLd(websiteSchema)}
+      {renderJsonLd(generateItemListSchema(featuredTools, 'Featured SaaS & AI Tools'))}
     <div className="min-h-screen bg-background">
       {/* Hero Section with Gradient */}
       <section className="relative border-b overflow-hidden">
@@ -259,5 +266,6 @@ export default async function HomePage() {
         </div>
       </section>
     </div>
+    </>
   )
 }

@@ -3,21 +3,52 @@ import { Tool, Review, Author, FAQ, Category } from './sanity.types'
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://verza.tech'
 
 // Organization Schema - Used site-wide
-export function generateOrganizationSchema() {
+export function generateOrganizationSchema(siteSettings?: {
+  socialLinks?: {
+    twitter?: string
+    linkedin?: string
+    youtube?: string
+    instagram?: string
+    facebook?: string
+    tiktok?: string
+  }
+  contactEmail?: string
+} | null) {
+  const sameAs: string[] = []
+  if (siteSettings?.socialLinks?.twitter)   sameAs.push(siteSettings.socialLinks.twitter)
+  if (siteSettings?.socialLinks?.linkedin)  sameAs.push(siteSettings.socialLinks.linkedin)
+  if (siteSettings?.socialLinks?.youtube)   sameAs.push(siteSettings.socialLinks.youtube)
+  if (siteSettings?.socialLinks?.instagram) sameAs.push(siteSettings.socialLinks.instagram)
+  if (siteSettings?.socialLinks?.facebook)  sameAs.push(siteSettings.socialLinks.facebook)
+
   return {
     '@context': 'https://schema.org',
     '@type': 'Organization',
+    '@id': `${siteUrl}/#organization`,
     name: 'Verza',
     url: siteUrl,
-    logo: `${siteUrl}/logo.png`,
-    description: 'SaaS and AI tool reviews, comparisons, and recommendations',
-    sameAs: [
-      // Add social media links when available
+    logo: {
+      '@type': 'ImageObject',
+      url: `${siteUrl}/logo.png`,
+      width: 200,
+      height: 60,
+    },
+    description: 'Independent SaaS and AI tool reviews, comparisons, and recommendations to help businesses choose the right software.',
+    inLanguage: 'en',
+    areaServed: [
+      { '@type': 'Country', name: 'United States' },
+      { '@type': 'Country', name: 'United Kingdom' },
+      { '@type': 'Country', name: 'Australia' },
+      { '@type': 'Country', name: 'Canada' },
+      { '@type': 'AdministrativeArea', name: 'Global' },
     ],
+    ...(sameAs.length > 0 && { sameAs }),
     contactPoint: {
       '@type': 'ContactPoint',
-      contactType: 'Customer Service',
+      contactType: 'Customer Support',
       url: `${siteUrl}/contact`,
+      ...(siteSettings?.contactEmail && { email: siteSettings.contactEmail }),
+      availableLanguage: 'English',
     },
   }
 }
@@ -39,8 +70,12 @@ export function generateWebsiteSchema() {
   return {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
+    '@id': `${siteUrl}/#website`,
     name: 'Verza',
     url: siteUrl,
+    inLanguage: 'en',
+    description: 'Independent SaaS and AI tool reviews, comparisons, and how-to guides.',
+    publisher: { '@id': `${siteUrl}/#organization` },
     potentialAction: {
       '@type': 'SearchAction',
       target: {
@@ -259,6 +294,20 @@ export function generateArticleSchema(review: Review) {
   }
 
   return schema
+}
+
+// Speakable Schema — marks content suitable for audio playback (Google Assistant, voice search)
+export function generateSpeakableSchema(pageUrl: string, cssSelectors: string[]) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    '@id': pageUrl,
+    speakable: {
+      '@type': 'SpeakableSpecification',
+      cssSelector: cssSelectors,
+    },
+    url: pageUrl,
+  }
 }
 
 // HowTo Schema — generated from howToBlock content sections
