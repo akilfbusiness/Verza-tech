@@ -181,7 +181,18 @@ export interface BlogRelatedResource {
 
 export interface BlogContentSection {
   heading: string
+  sectionAnswerCapsule?: string
   content: any // Portable Text
+}
+
+export interface DecisionFrameworkStep {
+  stepTitle: string
+  stepDescription: string
+}
+
+export interface DecisionFramework {
+  frameworkName?: string
+  steps?: DecisionFrameworkStep[]
 }
 
 // ─── SITE SETTINGS ──────────────────────────────────────────────────────────
@@ -286,6 +297,7 @@ export interface Blog {
   categories: Category[]
   targetAudience?: string[]
   summary: string
+  articleAnswerCapsule?: string
   introduction: string
   contentSections?: BlogContentSection[]
   // Authorship (referenced Author document)
@@ -296,6 +308,8 @@ export interface Blog {
   reviewFrequency?: 'monthly' | 'quarterly' | 'bi-annually' | 'annually'
   nextReviewDate?: string
   // AEO fields
+  decisionFramework?: DecisionFramework
+  dataProvenance?: string
   verdictBox?: BlogVerdictBox
   keyPoints?: BlogKeyPoint[]
   faqs?: BlogFAQ[]
