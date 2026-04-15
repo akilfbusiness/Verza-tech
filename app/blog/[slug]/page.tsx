@@ -110,20 +110,24 @@ function generateBlogArticleSchema(post: any, siteUrl: string) {
   // about — what entities this article is primarily about (categories + primary tool)
   const aboutEntities: any[] = []
   if (post.categories?.length) {
-    aboutEntities.push(...post.categories.map((cat: any) => ({
-      '@type': 'Thing',
-      name: cat.name,
-    })))
+    aboutEntities.push(...post.categories
+      .filter((cat: any) => cat?.name)
+      .map((cat: any) => ({
+        '@type': 'Thing',
+        name: cat.name,
+      })))
   }
   if (aboutEntities.length > 0) schema.about = aboutEntities
 
   // mentions — specific tools/software the article references
   if (post.toolsCompared?.length) {
-    schema.mentions = post.toolsCompared.map((tool: any) => ({
-      '@type': 'SoftwareApplication',
-      name: tool.name,
-      ...(tool.website && { url: tool.website }),
-    }))
+    schema.mentions = post.toolsCompared
+      .filter((tool: any) => tool?.name)
+      .map((tool: any) => ({
+        '@type': 'SoftwareApplication',
+        name: tool.name,
+        ...(tool.website && { url: tool.website }),
+      }))
   }
 
   return schema
@@ -252,7 +256,7 @@ export default async function BlogArticlePage({ params }: Props) {
                   {ARTICLE_TYPE_LABELS[post.articleType]}
                 </span>
               )}
-              {post.categories?.map((cat: any) => (
+              {post.categories?.filter((cat: any) => cat?.slug?.current).map((cat: any) => (
                 <Link
                   key={cat._id}
                   href={`/blog/category/${cat.slug.current}`}
