@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { CalendarDays, Clock, RefreshCw, ShieldCheck, ExternalLink, ChevronRight } from 'lucide-react'
 import { getBlogPostBySlug, getAllBlogSlugs } from '@/lib/sanity.queries'
-import { urlForImage } from '@/lib/sanity.image'
+import { urlForImage, urlForImageSafe } from '@/lib/sanity.image'
 import { Breadcrumb } from '@/components/breadcrumb'
 import { VerdictBox } from '@/components/blog/verdict-box'
 import { AffiliateCTA } from '@/components/blog/affiliate-cta'
@@ -89,9 +89,7 @@ function generateBlogArticleSchema(post: any, siteUrl: string) {
       url: siteUrl,
       logo: { '@type': 'ImageObject', url: `${siteUrl}/logo.png` },
     },
-    image: post.heroImage
-      ? urlForImage(post.heroImage).width(1200).height(630).url()
-      : `${siteUrl}/api/og?title=${encodeURIComponent(post.title)}`,
+    image: urlForImageSafe(post.heroImage) ?? `${siteUrl}/api/og?title=${encodeURIComponent(post.title)}`,
   }
 
   if (post.author) {
@@ -281,10 +279,10 @@ export default async function BlogArticlePage({ params }: Props) {
             <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted-foreground">
               {post.author && (
                 <div className="flex items-center gap-2">
-                  {post.author.image && (
+                  {urlForImageSafe(post.author.image) && (
                     <div className="w-8 h-8 rounded-full overflow-hidden bg-secondary flex-shrink-0 border">
                       <Image
-                        src={urlForImage(post.author.image).width(64).height(64).url()}
+                        src={urlForImageSafe(post.author.image)!}
                         alt={post.author.name}
                         width={32}
                         height={32}
@@ -335,12 +333,12 @@ export default async function BlogArticlePage({ params }: Props) {
         </header>
 
         {/* ── Hero image ───────────────────────────────────────────────── */}
-        {post.heroImage && (
+        {urlForImageSafe(post.heroImage) && (
           <div className="container mx-auto px-4 max-w-4xl mt-8">
             <figure className="relative rounded-xl overflow-hidden border aspect-video">
               <Image
-                src={urlForImage(post.heroImage).width(1200).height(675).url()}
-                alt={post.heroImage.alt || post.title}
+                src={urlForImageSafe(post.heroImage)!}
+                alt={post.heroImage?.alt || post.title}
                 fill
                 className="object-cover"
                 priority
@@ -663,10 +661,10 @@ export default async function BlogArticlePage({ params }: Props) {
           {post.author && (
             <section className="mt-10 pt-8 border-t" aria-label="About the author">
               <div className="flex items-start gap-4 p-6 rounded-xl bg-secondary/40 border">
-                {post.author.image && (
+                {urlForImageSafe(post.author.image) && (
                   <div className="w-14 h-14 rounded-full overflow-hidden bg-secondary flex-shrink-0 border-2 border-background shadow">
                     <Image
-                      src={urlForImage(post.author.image).width(112).height(112).url()}
+                      src={urlForImageSafe(post.author.image)!}
                       alt={post.author.name}
                       width={56}
                       height={56}
