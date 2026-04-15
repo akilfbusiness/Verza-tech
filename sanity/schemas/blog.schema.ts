@@ -594,7 +594,7 @@ export const blogSchema = {
           name: 'rating',
           title: 'Overall Rating (out of 5)',
           type: 'number',
-          validation: (Rule: any) => Rule.min(0).max(5).precision(1),
+          validation: (Rule: any) => Rule.min(0).max(5).precision(2),
         },
         {
           name: 'recommendation',
