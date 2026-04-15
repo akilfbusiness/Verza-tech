@@ -716,7 +716,7 @@ export const blogSchema = {
             { name: 'pros', title: 'Pros', type: 'array', of: [{ type: 'string' }] },
             { name: 'cons', title: 'Cons', type: 'array', of: [{ type: 'string' }] },
             { name: 'pricingLastVerified', title: 'Pricing Last Verified', type: 'date' },
-            { name: 'affiliateLink', title: 'Affiliate Link (for this tool)', type: 'string' },
+            { name: 'affiliateLink', title: 'Affiliate Link (for this tool)', type: 'url' },
             { name: 'promoCode', title: 'Promo Code', type: 'string' },
           ],
           preview: { select: { title: 'tool.name', subtitle: 'verdict' } },
