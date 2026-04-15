@@ -2,7 +2,7 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { getAllBlogPosts, getAllCategories } from '@/lib/sanity.queries'
-import { urlForImage } from '@/lib/sanity.image'
+import { urlForImageSafe } from '@/lib/sanity.image'
 import { generateItemListSchema, renderJsonLd } from '@/lib/schema'
 import { Breadcrumb } from '@/components/breadcrumb'
 
@@ -91,10 +91,10 @@ export default async function BlogPage() {
                     <div className="grid md:grid-cols-2 gap-0">
                       {/* Image */}
                       <div className="relative h-64 md:h-auto bg-secondary">
-                        {featured.heroImage ? (
+                        {urlForImageSafe(featured.heroImage) ? (
                           <Image
-                            src={urlForImage(featured.heroImage).url()}
-                            alt={featured.heroImage.alt || featured.title}
+                            src={urlForImageSafe(featured.heroImage)!}
+                            alt={featured.heroImage?.alt || featured.title}
                             fill
                             className="object-cover"
                           />
@@ -165,10 +165,10 @@ export default async function BlogPage() {
                       <article className="border rounded-xl overflow-hidden hover:border-primary hover:shadow-md transition-all h-full flex flex-col">
                         {/* Image */}
                         <div className="relative h-48 bg-secondary flex-shrink-0">
-                          {post.heroImage ? (
+                          {urlForImageSafe(post.heroImage) ? (
                             <Image
-                              src={urlForImage(post.heroImage).url()}
-                              alt={post.heroImage.alt || post.title}
+                              src={urlForImageSafe(post.heroImage)!}
+                              alt={post.heroImage?.alt || post.title}
                               fill
                               className="object-cover"
                             />
