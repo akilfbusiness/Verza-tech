@@ -4,7 +4,7 @@ import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { CalendarDays, Clock } from 'lucide-react'
 import { getBlogPostsByCategory, getCategoryBySlug, getAllCategories, getAllCategorySlugs } from '@/lib/sanity.queries'
-import { urlForImage } from '@/lib/sanity.image'
+import { urlForImageSafe } from '@/lib/sanity.image'
 import { Breadcrumb } from '@/components/breadcrumb'
 import { generateBreadcrumbSchema, renderJsonLd } from '@/lib/schema'
 
@@ -145,10 +145,10 @@ export default async function BlogCategoryPage({ params }: Props) {
                 >
                   {/* Thumbnail */}
                   <Link href={`/blog/${post.slug.current}`} className="block relative h-48 bg-secondary flex-shrink-0 overflow-hidden">
-                    {post.heroImage ? (
+                    {urlForImageSafe(post.heroImage) ? (
                       <Image
-                        src={urlForImage(post.heroImage).width(600).height(338).url()}
-                        alt={post.heroImage.alt || post.title}
+                        src={urlForImageSafe(post.heroImage)!}
+                        alt={post.heroImage?.alt || post.title}
                         fill
                         className="object-cover group-hover:scale-105 transition-transform duration-300"
                       />

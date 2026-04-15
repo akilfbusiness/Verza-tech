@@ -4,6 +4,7 @@ import Script from 'next/script'
 import { Analytics } from '@vercel/analytics/next'
 import { generateOrganizationSchema, generateWebsiteSchema, renderJsonLd } from '@/lib/schema'
 import { SiteLayout } from '@/components/layout/site-layout'
+import { PostHogProvider } from '@/components/providers/posthog-provider'
 import './globals.css'
 
 const inter = Inter({ 
@@ -128,9 +129,11 @@ export default function RootLayout({
         {renderJsonLd(websiteSchema)}
       </head>
       <body className="font-sans antialiased">
-        <SiteLayout>
-          {children}
-        </SiteLayout>
+        <PostHogProvider>
+          <SiteLayout>
+            {children}
+          </SiteLayout>
+        </PostHogProvider>
         <Analytics />
 
         {/* Google Analytics 4 */}
