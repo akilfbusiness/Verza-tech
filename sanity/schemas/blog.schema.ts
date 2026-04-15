@@ -803,7 +803,7 @@ export const blogSchema = {
           type: 'object',
           fields: [
             { name: 'label', title: 'Button Label', type: 'string', validation: (Rule: any) => Rule.required() },
-            { name: 'url', title: 'Affiliate URL', type: 'url', validation: (Rule: any) => Rule.required() },
+            { name: 'url', title: 'Affiliate URL', type: 'url' },
             { name: 'promoCode', title: 'Promo Code', type: 'string' },
           ],
           preview: { select: { title: 'label', subtitle: 'url' } },
