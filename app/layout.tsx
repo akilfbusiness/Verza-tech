@@ -19,7 +19,7 @@ const jetbrainsMono = JetBrains_Mono({
   display: 'swap',
 })
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://verza.com'
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://verza.tech'
 const siteName = 'Verza'
 const siteDescription = 'Discover and compare the best SaaS and AI tools. In-depth reviews, pricing comparisons, and expert recommendations to help you choose the right software.'
 
