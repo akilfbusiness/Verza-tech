@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Menu, X, ChevronDown, ChevronRight } from 'lucide-react'
@@ -12,7 +12,6 @@ interface SiteNavProps {
   siteSettings?: SiteSettings | null
 }
 
-// Hardcoded fallback nav items — used when no Navigation document exists in Sanity yet
 const FALLBACK_NAV_ITEMS: NavItem[] = [
   { label: 'Tools',       href: '/tools' },
   { label: 'Reviews',     href: '/reviews' },
@@ -25,32 +24,25 @@ const FALLBACK_CTA = { label: 'Browse Reviews', link: '/blog', style: 'primary' 
 export function SiteNav({ categories = [], navigation, siteSettings }: SiteNavProps) {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
+  const [scrolled, setScrolled] = useState(false)
   const pathname = usePathname()
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   const isActive = (href?: string) =>
     href ? pathname === href || pathname.startsWith(href + '/') : false
 
-  // Resolve data — CMS wins, fallback used when CMS document isn't published yet
-  const siteName  = siteSettings?.siteName || 'Verza'
-  const navItems  = navigation?.headerItems?.length
-    ? navigation.headerItems
-    : FALLBACK_NAV_ITEMS
-
+  const siteName   = siteSettings?.siteName || 'Verza'
+  const navItems   = navigation?.headerItems?.length ? navigation.headerItems : FALLBACK_NAV_ITEMS
   const ctaEnabled = navigation ? (navigation.headerCtaEnabled ?? true) : true
   const ctaLabel   = navigation?.headerCtaLabel || FALLBACK_CTA.label
   const ctaLink    = navigation?.headerCtaLink  || FALLBACK_CTA.link
-  const ctaStyle   = navigation?.headerCtaStyle || FALLBACK_CTA.style
 
-  const ctaClassName =
-    ctaStyle === 'outline'
-      ? 'px-4 py-2 rounded-lg border-2 border-primary text-primary text-sm font-medium hover:bg-primary/10 transition-colors'
-      : ctaStyle === 'ghost'
-      ? 'px-4 py-2 rounded-lg text-primary text-sm font-medium hover:bg-secondary transition-colors'
-      : 'px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors'
-
-  const navCategories = categories
-    .filter((cat) => cat.showInNav !== false)
-    .slice(0, 8)
+  const navCategories = categories.filter((cat) => cat.showInNav !== false).slice(0, 8)
 
   function closeAll() {
     setOpenDropdown(null)
@@ -58,10 +50,10 @@ export function SiteNav({ categories = [], navigation, siteSettings }: SiteNavPr
   }
 
   function renderNavItem(item: NavItem) {
-    const hasBlogDropdown = item.isBlogDropdown
+    const hasBlogDropdown   = item.isBlogDropdown
     const hasManualDropdown = !hasBlogDropdown && item.dropdown && item.dropdown.length > 0
-    const hasDropdown = hasBlogDropdown || hasManualDropdown
-    const key = item.label
+    const hasDropdown       = hasBlogDropdown || hasManualDropdown
+    const key               = item.label
 
     if (!hasDropdown) {
       return (
@@ -70,10 +62,12 @@ export function SiteNav({ categories = [], navigation, siteSettings }: SiteNavPr
           href={item.href || '#'}
           target={item.openInNewTab ? '_blank' : undefined}
           rel={item.openInNewTab ? 'noopener noreferrer' : undefined}
-          className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+          className={`relative px-1 py-2 text-sm tracking-wide transition-colors duration-200
+            after:absolute after:bottom-0 after:left-0 after:h-px after:w-0
+            after:bg-primary after:transition-all after:duration-300 hover:after:w-full ${
             isActive(item.href)
-              ? 'text-primary bg-primary/10'
-              : 'text-foreground hover:text-primary hover:bg-secondary'
+              ? 'text-primary after:w-full'
+              : 'text-foreground/70 hover:text-foreground'
           }`}
         >
           {item.label}
@@ -88,24 +82,26 @@ export function SiteNav({ categories = [], navigation, siteSettings }: SiteNavPr
         <button
           onClick={() => setOpenDropdown(isOpen ? null : key)}
           onBlur={() => setTimeout(() => setOpenDropdown(null), 150)}
-          className={`flex items-center gap-1 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-            isActive(item.href) ? 'text-primary bg-primary/10' : 'text-foreground hover:text-primary hover:bg-secondary'
+          className={`flex items-center gap-1 px-1 py-2 text-sm tracking-wide transition-colors duration-200 ${
+            isActive(item.href) ? 'text-primary' : 'text-foreground/70 hover:text-foreground'
           }`}
           aria-expanded={isOpen}
           aria-haspopup="true"
         >
           {item.label}
-          <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
+          <ChevronDown
+            className={`w-3.5 h-3.5 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+            aria-hidden="true"
+          />
         </button>
 
         {isOpen && (
-          <div className="absolute top-full left-0 mt-1 w-64 bg-background border rounded-xl shadow-xl py-2 z-50">
-            {/* Blog category dropdown */}
+          <div className="absolute top-full left-0 mt-2 w-60 bg-background border border-border shadow-lg py-1.5 z-50">
             {hasBlogDropdown && (
               <>
                 <Link
                   href="/blog"
-                  className="flex items-center px-4 py-2.5 mx-1 text-sm hover:bg-secondary transition-colors font-semibold rounded-lg"
+                  className="flex items-center px-5 py-2.5 text-sm hover:bg-secondary transition-colors font-medium"
                   onClick={closeAll}
                 >
                   All Articles
@@ -113,15 +109,15 @@ export function SiteNav({ categories = [], navigation, siteSettings }: SiteNavPr
                 </Link>
                 {navCategories.length > 0 && (
                   <>
-                    <div className="border-t my-2 mx-4" />
-                    <p className="px-4 py-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                      Browse by Category
+                    <div className="border-t my-1.5 mx-4" />
+                    <p className="px-5 py-1 text-xs font-semibold text-muted-foreground uppercase tracking-widest">
+                      Categories
                     </p>
                     {navCategories.map((cat) => (
                       <Link
                         key={cat._id}
                         href={`/blog/category/${cat.slug.current}`}
-                        className="block px-4 py-2 mx-1 text-sm hover:bg-secondary transition-colors rounded-lg"
+                        className="block px-5 py-2 text-sm hover:bg-secondary transition-colors"
                         onClick={closeAll}
                       >
                         <span className="font-medium">{cat.name}</span>
@@ -136,15 +132,13 @@ export function SiteNav({ categories = [], navigation, siteSettings }: SiteNavPr
                 )}
               </>
             )}
-
-            {/* Manual dropdown items */}
             {hasManualDropdown && item.dropdown!.map((sub) => (
               <Link
                 key={sub.href}
                 href={sub.href}
                 target={sub.openInNewTab ? '_blank' : undefined}
                 rel={sub.openInNewTab ? 'noopener noreferrer' : undefined}
-                className="block px-4 py-2 mx-1 text-sm hover:bg-secondary transition-colors rounded-lg font-medium"
+                className="block px-5 py-2 text-sm hover:bg-secondary transition-colors font-medium"
                 onClick={closeAll}
               >
                 {sub.label}
@@ -157,31 +151,44 @@ export function SiteNav({ categories = [], navigation, siteSettings }: SiteNavPr
   }
 
   return (
-    <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b">
-      <div className="container mx-auto px-4 max-w-6xl">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo / Site Name */}
-          <Link href="/" className="flex items-center gap-2 font-bold text-xl text-primary">
+    <header
+      className={`sticky top-0 z-50 transition-all duration-300 ${
+        scrolled
+          ? 'bg-background/98 backdrop-blur-md border-b border-border shadow-sm'
+          : 'bg-background border-b border-border'
+      }`}
+    >
+      <div className="container mx-auto px-6 max-w-7xl">
+        <div className="flex items-center justify-between py-4">
+          {/* Logo */}
+          <Link
+            href="/"
+            className="text-xl font-medium tracking-tight text-foreground hover:text-primary transition-colors duration-200"
+            style={{ fontFamily: 'var(--font-cormorant), Georgia, serif', fontSize: '1.5rem' }}
+          >
             {siteName}
           </Link>
 
           {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-1" aria-label="Main navigation">
+          <nav className="hidden md:flex items-center gap-8" aria-label="Main navigation">
             {navItems.map(renderNavItem)}
           </nav>
 
-          {/* Header CTA */}
+          {/* CTA */}
           {ctaEnabled && (
-            <div className="hidden md:flex items-center gap-3">
-              <Link href={ctaLink} className={ctaClassName}>
+            <div className="hidden md:flex items-center">
+              <Link
+                href={ctaLink}
+                className="px-5 py-2.5 text-sm tracking-wide border border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300"
+              >
                 {ctaLabel}
               </Link>
             </div>
           )}
 
-          {/* Mobile menu button */}
+          {/* Mobile toggle */}
           <button
-            className="md:hidden p-2 rounded-md hover:bg-secondary transition-colors"
+            className="md:hidden p-2 text-foreground/70 hover:text-foreground transition-colors"
             onClick={() => setMobileOpen(!mobileOpen)}
             aria-label="Toggle navigation menu"
             aria-expanded={mobileOpen}
@@ -193,15 +200,18 @@ export function SiteNav({ categories = [], navigation, siteSettings }: SiteNavPr
 
       {/* Mobile nav */}
       {mobileOpen && (
-        <div className="md:hidden border-t bg-background">
-          <nav className="container mx-auto px-4 py-4 max-w-6xl flex flex-col gap-1" aria-label="Mobile navigation">
+        <div className="md:hidden border-t border-border bg-background">
+          <nav
+            className="container mx-auto px-6 py-6 max-w-7xl flex flex-col gap-1"
+            aria-label="Mobile navigation"
+          >
             {navItems.map((item) => {
               if (item.isBlogDropdown) {
                 return (
                   <div key={item.label}>
                     <Link
                       href="/blog"
-                      className="block px-3 py-2 rounded-md text-sm font-medium hover:bg-secondary transition-colors"
+                      className="block px-2 py-3 text-sm font-medium border-b border-border/50"
                       onClick={closeAll}
                     >
                       Blog — All Articles
@@ -210,7 +220,7 @@ export function SiteNav({ categories = [], navigation, siteSettings }: SiteNavPr
                       <Link
                         key={cat._id}
                         href={`/blog/category/${cat.slug.current}`}
-                        className="block px-3 py-2 pl-6 rounded-md text-sm text-muted-foreground hover:bg-secondary transition-colors"
+                        className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
                         onClick={closeAll}
                       >
                         {cat.name}
@@ -225,7 +235,7 @@ export function SiteNav({ categories = [], navigation, siteSettings }: SiteNavPr
                     {item.href && (
                       <Link
                         href={item.href}
-                        className="block px-3 py-2 rounded-md text-sm font-medium hover:bg-secondary transition-colors"
+                        className="block px-2 py-3 text-sm font-medium border-b border-border/50"
                         onClick={closeAll}
                       >
                         {item.label}
@@ -235,7 +245,7 @@ export function SiteNav({ categories = [], navigation, siteSettings }: SiteNavPr
                       <Link
                         key={sub.href}
                         href={sub.href}
-                        className="block px-3 py-2 pl-6 rounded-md text-sm text-muted-foreground hover:bg-secondary transition-colors"
+                        className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
                         onClick={closeAll}
                       >
                         {sub.label}
@@ -249,19 +259,18 @@ export function SiteNav({ categories = [], navigation, siteSettings }: SiteNavPr
                   key={item.label}
                   href={item.href || '#'}
                   target={item.openInNewTab ? '_blank' : undefined}
-                  className="block px-3 py-2 rounded-md text-sm font-medium hover:bg-secondary transition-colors"
+                  className="block px-2 py-3 text-sm font-medium border-b border-border/50 last:border-0"
                   onClick={closeAll}
                 >
                   {item.label}
                 </Link>
               )
             })}
-
             {ctaEnabled && (
-              <div className="pt-2 border-t mt-2">
+              <div className="pt-4">
                 <Link
                   href={ctaLink}
-                  className="block w-full text-center px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium"
+                  className="block w-full text-center px-5 py-3 text-sm tracking-wide border border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300"
                   onClick={closeAll}
                 >
                   {ctaLabel}

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter, JetBrains_Mono } from 'next/font/google'
+import { Inter, Cormorant_Garamond, JetBrains_Mono } from 'next/font/google'
 import Script from 'next/script'
 import { Analytics } from '@vercel/analytics/next'
 import { generateOrganizationSchema, generateWebsiteSchema, renderJsonLd } from '@/lib/schema'
@@ -7,13 +7,21 @@ import { SiteLayout } from '@/components/layout/site-layout'
 import { PostHogProvider } from '@/components/providers/posthog-provider'
 import './globals.css'
 
-const inter = Inter({ 
+const inter = Inter({
   subsets: ['latin'],
-  variable: '--font-sans',
+  variable: '--font-inter',
   display: 'swap',
 })
 
-const jetbrainsMono = JetBrains_Mono({ 
+const cormorant = Cormorant_Garamond({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
+  style: ['normal', 'italic'],
+  variable: '--font-cormorant',
+  display: 'swap',
+})
+
+const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
   variable: '--font-mono',
   display: 'swap',
@@ -123,7 +131,7 @@ export default function RootLayout({
   const websiteSchema = generateWebsiteSchema()
 
   return (
-    <html lang="en-AU" className={`${inter.variable} ${jetbrainsMono.variable}`}>
+    <html lang="en-AU" className={`${inter.variable} ${cormorant.variable} ${jetbrainsMono.variable}`}>
       <head>
         {renderJsonLd(organizationSchema)}
         {renderJsonLd(websiteSchema)}
