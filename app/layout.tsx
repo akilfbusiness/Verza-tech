@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter, Cormorant_Garamond, JetBrains_Mono } from 'next/font/google'
+import { Inter, Cormorant_Garamond, JetBrains_Mono, Anton } from 'next/font/google'
 import Script from 'next/script'
 import { Analytics } from '@vercel/analytics/next'
 import { generateOrganizationSchema, generateWebsiteSchema, renderJsonLd } from '@/lib/schema'
@@ -24,6 +24,13 @@ const cormorant = Cormorant_Garamond({
 const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
   variable: '--font-mono',
+  display: 'swap',
+})
+
+const anton = Anton({
+  subsets: ['latin'],
+  weight: '400',
+  variable: '--font-anton',
   display: 'swap',
 })
 
@@ -131,7 +138,7 @@ export default function RootLayout({
   const websiteSchema = generateWebsiteSchema()
 
   return (
-    <html lang="en-AU" className={`${inter.variable} ${cormorant.variable} ${jetbrainsMono.variable}`}>
+    <html lang="en-AU" className={`${inter.variable} ${cormorant.variable} ${jetbrainsMono.variable} ${anton.variable}`}>
       <head>
         {renderJsonLd(organizationSchema)}
         {renderJsonLd(websiteSchema)}

@@ -144,23 +144,24 @@ export function HeroSection({
         />
       </motion.div>
 
-      {/* Giant solid brand letters at bottom — Arrodz style */}
-      <div className="overflow-hidden pointer-events-none select-none" aria-hidden>
+      {/* Giant solid brand letters — Arrodz style, Anton font, full bleed */}
+      <div className="pointer-events-none select-none w-full" aria-hidden>
         <motion.p
-          className="font-bold uppercase leading-none"
+          className="uppercase leading-none whitespace-nowrap"
           style={{
-            fontFamily: 'var(--font-cormorant), Georgia, serif',
-            fontSize: 'clamp(7rem, 26vw, 22rem)',
-            letterSpacing: '-0.045em',
-            color: 'rgba(255,255,255,0.07)',
-            marginBottom: '-0.12em',
-            lineHeight: 0.85,
+            fontFamily: 'var(--font-anton), Impact, sans-serif',
+            fontSize: 'clamp(9rem, 34vw, 32rem)',
+            letterSpacing: '-0.02em',
+            color: '#ffffff',
+            lineHeight: 0.82,
+            marginBottom: '-0.18em',
+            marginLeft: '-0.02em',
           }}
-          initial={{ opacity: 0, y: 60 }}
+          initial={{ opacity: 0, y: 80 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.3, delay: 0.6, ease }}
+          transition={{ duration: 1.2, delay: 0.5, ease }}
         >
-          Verza
+          VERZA
         </motion.p>
       </div>
     </section>
