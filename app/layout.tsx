@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter, Cormorant_Garamond, JetBrains_Mono, Bebas_Neue } from 'next/font/google'
+import { Inter, Cormorant_Garamond, JetBrains_Mono, Bebas_Neue, Big_Shoulders } from 'next/font/google'
 import Script from 'next/script'
 import { Analytics } from '@vercel/analytics/next'
 import { generateOrganizationSchema, generateWebsiteSchema, renderJsonLd } from '@/lib/schema'
@@ -18,6 +18,13 @@ const cormorant = Cormorant_Garamond({
   weight: ['300', '400', '500', '600', '700'],
   style: ['normal', 'italic'],
   variable: '--font-cormorant',
+  display: 'swap',
+})
+
+const bigShoulders = Big_Shoulders({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700', '800'],
+  variable: '--font-big-shoulders',
   display: 'swap',
 })
 
@@ -101,18 +108,7 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
-      },
+      { url: '/icon.svg', type: 'image/svg+xml' },
     ],
     apple: '/apple-icon.png',
   },
@@ -138,7 +134,7 @@ export default function RootLayout({
   const websiteSchema = generateWebsiteSchema()
 
   return (
-    <html lang="en-AU" className={`${inter.variable} ${cormorant.variable} ${jetbrainsMono.variable} ${bebasNeue.variable}`}>
+    <html lang="en-AU" className={`${inter.variable} ${cormorant.variable} ${bigShoulders.variable} ${jetbrainsMono.variable} ${bebasNeue.variable}`}>
       <head>
         {renderJsonLd(organizationSchema)}
         {renderJsonLd(websiteSchema)}

@@ -23,7 +23,7 @@ export function CategoriesSection({ categories, heading, subheading }: Categorie
           </p>
           <h2
             className="text-4xl md:text-5xl font-light text-foreground mb-4"
-            style={{ fontFamily: 'var(--font-cormorant), Georgia, serif' }}
+            style={{ fontFamily: 'var(--font-display), sans-serif' }}
           >
             {heading}
           </h2>

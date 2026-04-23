@@ -49,7 +49,7 @@ export function HowItWorksSection() {
             <motion.h2
               className="font-light leading-[1.05]"
               style={{
-                fontFamily: 'var(--font-cormorant), Georgia, serif',
+                fontFamily: 'var(--font-display), sans-serif',
                 fontSize: 'clamp(2.2rem, 4.5vw, 4rem)',
                 letterSpacing: '-0.02em',
               }}
@@ -83,7 +83,7 @@ export function HowItWorksSection() {
               <span
                 className="text-[3.5rem] font-light leading-none tabular-nums"
                 style={{
-                  fontFamily: 'var(--font-cormorant), Georgia, serif',
+                  fontFamily: 'var(--font-display), sans-serif',
                   color: 'var(--primary)',
                   opacity: 0.35,
                 }}
@@ -94,7 +94,7 @@ export function HowItWorksSection() {
                 <h3
                   className="text-foreground font-medium mb-3"
                   style={{
-                    fontFamily: 'var(--font-cormorant), Georgia, serif',
+                    fontFamily: 'var(--font-display), sans-serif',
                     fontSize: '1.35rem',
                     letterSpacing: '-0.01em',
                   }}

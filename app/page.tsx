@@ -14,6 +14,8 @@ import { AboutSection }        from '@/components/home/about-section'
 import { HowItWorksSection }   from '@/components/home/how-it-works-section'
 import { CategoriesSection }   from '@/components/home/categories-section'
 import { FeaturedToolsSection } from '@/components/home/featured-tools-section'
+import { TestimonialsSection } from '@/components/home/testimonials-section'
+import { ComparisonSection }   from '@/components/home/comparison-section'
 import { NewsletterSection }   from '@/components/home/newsletter-section'
 import { CtaSection }          from '@/components/home/cta-section'
 
@@ -128,6 +130,10 @@ export default async function HomePage() {
             subheading={featuredToolsSubhead}
           />
         )}
+
+        <ComparisonSection />
+
+        <TestimonialsSection />
 
         <NewsletterSection />
 

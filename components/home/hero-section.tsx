@@ -15,7 +15,7 @@ interface HeroSectionProps {
 
 const ease: [number, number, number, number] = [0.22, 1, 0.36, 1]
 const HERO_BG = '#07080c'
-const ACCENT  = 'oklch(0.72 0.1 255)'   /* slate-blue — visible on dark bg */
+const ACCENT  = 'oklch(0.72 0.1 255)'
 
 export function HeroSection({
   headline,
@@ -29,6 +29,7 @@ export function HeroSection({
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] })
   const contentY       = useTransform(scrollYProgress, [0, 1], ['0%', '18%'])
   const contentOpacity = useTransform(scrollYProgress, [0, 0.55], [1, 0])
+  const bgY            = useTransform(scrollYProgress, [0, 1], ['0%', '30%'])
 
   useEffect(() => {
     document.body.setAttribute('data-dark-hero', 'true')
@@ -43,13 +44,58 @@ export function HeroSection({
       className="relative min-h-[calc(100vh-4rem)] overflow-hidden flex flex-col"
       style={{ background: HERO_BG }}
     >
+      {/* Unsplash background — dark tech atmosphere */}
+      <motion.div
+        className="absolute inset-0 pointer-events-none"
+        style={{ y: bgY }}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920&q=80&auto=format"
+          alt=""
+          aria-hidden
+          className="w-full h-full object-cover object-center"
+          style={{ opacity: 0.1, mixBlendMode: 'luminosity' }}
+        />
+      </motion.div>
+
+      {/* Animated glow orbs */}
+      <div
+        className="absolute pointer-events-none"
+        style={{
+          top: '15%',
+          right: '8%',
+          width: '55vw',
+          height: '55vw',
+          maxWidth: '700px',
+          maxHeight: '700px',
+          background: 'radial-gradient(circle, oklch(0.72 0.1 255 / 0.1) 0%, transparent 65%)',
+          filter: 'blur(40px)',
+          animation: 'glow-pulse 9s ease-in-out infinite',
+        }}
+      />
+      <div
+        className="absolute pointer-events-none"
+        style={{
+          bottom: '20%',
+          left: '5%',
+          width: '40vw',
+          height: '40vw',
+          maxWidth: '500px',
+          maxHeight: '500px',
+          background: 'radial-gradient(circle, oklch(0.55 0.08 250 / 0.07) 0%, transparent 65%)',
+          filter: 'blur(50px)',
+          animation: 'glow-pulse 12s ease-in-out infinite reverse',
+        }}
+      />
+
       {/* Subtle editorial grid */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
           backgroundImage:
-            'linear-gradient(rgba(255,255,255,0.015) 1px,transparent 1px),' +
-            'linear-gradient(90deg,rgba(255,255,255,0.015) 1px,transparent 1px)',
+            'linear-gradient(rgba(255,255,255,0.012) 1px,transparent 1px),' +
+            'linear-gradient(90deg,rgba(255,255,255,0.012) 1px,transparent 1px)',
           backgroundSize: '80px 80px',
         }}
       />
@@ -80,21 +126,21 @@ export function HeroSection({
           </motion.p>
         </div>
 
-        {/* Bottom area: headline + sidebar */}
+        {/* Bottom: headline + sidebar */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] xl:grid-cols-[1fr_340px] gap-10 lg:gap-20 items-end mt-auto pt-16">
           {/* Headline — word-by-word */}
           <h1
-            className="text-white font-light leading-[0.88] m-0"
+            className="text-white font-light leading-[0.92] m-0"
             style={{
-              fontFamily: 'var(--font-cormorant), Georgia, serif',
-              fontSize: 'clamp(2.8rem, 7vw, 6.5rem)',
-              letterSpacing: '-0.02em',
+              fontFamily: 'var(--font-display), sans-serif',
+              fontSize: 'clamp(3rem, 8vw, 7.5rem)',
+              letterSpacing: '-0.01em',
             }}
           >
             {words.map((word, i) => (
               <motion.span
                 key={i}
-                className="inline-block mr-[0.22em]"
+                className="inline-block mr-[0.18em]"
                 initial={{ opacity: 0, y: 80 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.9, delay: 0.35 + i * 0.08, ease }}
@@ -111,13 +157,17 @@ export function HeroSection({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.9, ease }}
           >
+            <div
+              className="w-10 h-px"
+              style={{ background: ACCENT, opacity: 0.5 }}
+            />
             <p className="text-white/40 text-sm leading-relaxed">
               {subheadline}
             </p>
             <div className="flex flex-col gap-3">
               <Link
                 href={primaryLink}
-                className="group inline-flex items-center justify-center px-7 py-4 text-[11px] tracking-[0.25em] uppercase font-medium transition-opacity duration-200 hover:opacity-85"
+                className="group inline-flex items-center justify-center px-7 py-4 text-[11px] tracking-[0.25em] uppercase font-semibold transition-opacity duration-200 hover:opacity-85"
                 style={{ background: ACCENT, color: HERO_BG }}
               >
                 {primaryLabel}

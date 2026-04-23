@@ -40,7 +40,7 @@ export function NewsletterSection() {
             <motion.h2
               className="text-white font-light leading-[1.05] mb-6"
               style={{
-                fontFamily: 'var(--font-cormorant), Georgia, serif',
+                fontFamily: 'var(--font-display), sans-serif',
                 fontSize: 'clamp(2rem, 4vw, 3.5rem)',
                 letterSpacing: '-0.02em',
               }}
@@ -75,7 +75,7 @@ export function NewsletterSection() {
                 <p
                   className="text-white font-light"
                   style={{
-                    fontFamily: 'var(--font-cormorant), Georgia, serif',
+                    fontFamily: 'var(--font-display), sans-serif',
                     fontSize: '1.4rem',
                     letterSpacing: '-0.01em',
                   }}

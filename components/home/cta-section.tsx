@@ -31,7 +31,7 @@ export function CtaSection({ heading, body, ctaLabel, ctaLink }: CtaSectionProps
 
         <motion.h2
           className="text-4xl md:text-6xl font-light text-background mb-6 leading-tight"
-          style={{ fontFamily: 'var(--font-cormorant), Georgia, serif' }}
+          style={{ fontFamily: 'var(--font-display), sans-serif' }}
           initial={{ opacity: 0, y: 24 }}
           animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
           transition={{ duration: 0.7, delay: 0.1, ease }}

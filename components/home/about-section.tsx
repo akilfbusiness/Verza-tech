@@ -52,7 +52,7 @@ export function AboutSection() {
             <motion.h2
               className="text-white font-light leading-[1.05] mb-8"
               style={{
-                fontFamily: 'var(--font-cormorant), Georgia, serif',
+                fontFamily: 'var(--font-display), sans-serif',
                 fontSize: 'clamp(2.2rem, 4.5vw, 4rem)',
                 letterSpacing: '-0.02em',
               }}
@@ -107,7 +107,7 @@ export function AboutSection() {
                   <p
                     className="text-white font-medium mb-2"
                     style={{
-                      fontFamily: 'var(--font-cormorant), Georgia, serif',
+                      fontFamily: 'var(--font-display), sans-serif',
                       fontSize: '1.2rem',
                       letterSpacing: '-0.01em',
                     }}
@@ -132,7 +132,7 @@ export function AboutSection() {
               <p
                 className="text-white font-light"
                 style={{
-                  fontFamily: 'var(--font-cormorant), Georgia, serif',
+                  fontFamily: 'var(--font-display), sans-serif',
                   fontSize: 'clamp(2rem, 3.5vw, 3rem)',
                 }}
               >

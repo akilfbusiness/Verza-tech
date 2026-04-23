@@ -21,7 +21,7 @@ export function StatsSection({ stats }: StatsSectionProps) {
             <FadeIn key={i} delay={i * 0.1} direction="up">
               <div className="text-center">
                 <div className="text-4xl md:text-5xl font-light text-foreground mb-3"
-                  style={{ fontFamily: 'var(--font-cormorant), Georgia, serif' }}>
+                  style={{ fontFamily: 'var(--font-display), sans-serif' }}>
                   <CountUp value={stat.value} />
                 </div>
                 <div className="text-xs font-semibold tracking-[0.2em] uppercase text-muted-foreground">

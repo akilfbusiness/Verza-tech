@@ -55,7 +55,7 @@ export function SiteFooter({ categories = [], navigation, siteSettings }: SiteFo
             <Link
               href="/"
               className="text-xl font-medium tracking-tight text-foreground hover:text-primary transition-colors duration-200 block mb-4"
-              style={{ fontFamily: 'var(--font-cormorant), Georgia, serif', fontSize: '1.5rem' }}
+              style={{ fontFamily: 'var(--font-display), sans-serif', fontSize: '1.5rem' }}
             >
               {siteName}
             </Link>

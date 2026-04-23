@@ -196,7 +196,7 @@ export function SiteNav({ categories = [], navigation, siteSettings }: SiteNavPr
             href="/"
             className="font-medium tracking-tight transition-colors duration-300"
             style={{
-              fontFamily: 'var(--font-cormorant), Georgia, serif',
+              fontFamily: 'var(--font-display), sans-serif',
               fontSize: '1.5rem',
               color: isDark ? '#ffffff' : 'var(--foreground)',
             }}
