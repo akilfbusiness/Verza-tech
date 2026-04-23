@@ -14,8 +14,8 @@ interface HeroSectionProps {
 }
 
 const ease: [number, number, number, number] = [0.22, 1, 0.36, 1]
-const HERO_BG = '#080808'
-const GOLD    = 'oklch(0.62 0.18 55)'
+const HERO_BG = '#07080c'
+const ACCENT  = 'oklch(0.72 0.1 255)'   /* slate-blue — visible on dark bg */
 
 export function HeroSection({
   headline,
@@ -30,7 +30,6 @@ export function HeroSection({
   const contentY       = useTransform(scrollYProgress, [0, 1], ['0%', '18%'])
   const contentOpacity = useTransform(scrollYProgress, [0, 0.55], [1, 0])
 
-  // Signal to the nav that this page has a dark hero
   useEffect(() => {
     document.body.setAttribute('data-dark-hero', 'true')
     return () => document.body.removeAttribute('data-dark-hero')
@@ -49,8 +48,8 @@ export function HeroSection({
         className="absolute inset-0 pointer-events-none"
         style={{
           backgroundImage:
-            'linear-gradient(rgba(255,255,255,0.018) 1px,transparent 1px),' +
-            'linear-gradient(90deg,rgba(255,255,255,0.018) 1px,transparent 1px)',
+            'linear-gradient(rgba(255,255,255,0.015) 1px,transparent 1px),' +
+            'linear-gradient(90deg,rgba(255,255,255,0.015) 1px,transparent 1px)',
           backgroundSize: '80px 80px',
         }}
       />
@@ -64,7 +63,7 @@ export function HeroSection({
         <div className="flex items-start justify-between">
           <motion.p
             className="text-xs font-semibold tracking-[0.3em] uppercase"
-            style={{ color: GOLD }}
+            style={{ color: ACCENT }}
             initial={{ opacity: 0, x: -16 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.7, delay: 0.25, ease }}
@@ -119,7 +118,7 @@ export function HeroSection({
               <Link
                 href={primaryLink}
                 className="group inline-flex items-center justify-center px-7 py-4 text-[11px] tracking-[0.25em] uppercase font-medium transition-opacity duration-200 hover:opacity-85"
-                style={{ background: GOLD, color: HERO_BG }}
+                style={{ background: ACCENT, color: HERO_BG }}
               >
                 {primaryLabel}
                 <span className="ml-2.5 transition-transform duration-300 group-hover:translate-x-1">→</span>
@@ -137,24 +136,24 @@ export function HeroSection({
         {/* Divider line */}
         <motion.div
           className="mt-14 h-px"
-          style={{ background: 'rgba(255,255,255,0.08)' }}
+          style={{ background: 'rgba(255,255,255,0.07)' }}
           initial={{ scaleX: 0, originX: '0%' }}
           animate={{ scaleX: 1 }}
           transition={{ duration: 1.5, delay: 1.1, ease: 'easeInOut' }}
         />
       </motion.div>
 
-      {/* Giant solid brand letters — Arrodz style, Anton font, full bleed */}
-      <div className="pointer-events-none select-none w-full" aria-hidden>
+      {/* Giant brand letters — Bebas Neue, full bleed */}
+      <div className="pointer-events-none select-none w-full overflow-hidden" aria-hidden>
         <motion.p
           className="uppercase leading-none whitespace-nowrap"
           style={{
-            fontFamily: 'var(--font-anton), Impact, sans-serif',
+            fontFamily: 'var(--font-bebas-neue), Impact, sans-serif',
             fontSize: 'clamp(9rem, 34vw, 32rem)',
-            letterSpacing: '-0.02em',
+            letterSpacing: '-0.01em',
             color: '#ffffff',
             lineHeight: 0.82,
-            marginBottom: '-0.18em',
+            marginBottom: '-0.12em',
             marginLeft: '-0.02em',
           }}
           initial={{ opacity: 0, y: 80 }}

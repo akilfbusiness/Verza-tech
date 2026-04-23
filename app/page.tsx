@@ -7,11 +7,15 @@ import {
   generateItemListSchema,
   renderJsonLd,
 } from '@/lib/schema'
-import { HeroSection } from '@/components/home/hero-section'
-import { StatsSection } from '@/components/home/stats-section'
-import { CategoriesSection } from '@/components/home/categories-section'
+import { HeroSection }         from '@/components/home/hero-section'
+import { LogosSection }        from '@/components/home/logos-section'
+import { StatsSection }        from '@/components/home/stats-section'
+import { AboutSection }        from '@/components/home/about-section'
+import { HowItWorksSection }   from '@/components/home/how-it-works-section'
+import { CategoriesSection }   from '@/components/home/categories-section'
 import { FeaturedToolsSection } from '@/components/home/featured-tools-section'
-import { CtaSection } from '@/components/home/cta-section'
+import { NewsletterSection }   from '@/components/home/newsletter-section'
+import { CtaSection }          from '@/components/home/cta-section'
 
 export const revalidate = 60
 
@@ -99,9 +103,15 @@ export default async function HomePage() {
           secondaryLink={heroSecondaryLink}
         />
 
+        <LogosSection />
+
         {statsEnabled && stats.length > 0 && (
           <StatsSection stats={stats} />
         )}
+
+        <AboutSection />
+
+        <HowItWorksSection />
 
         {showCategories && categories.length > 0 && (
           <CategoriesSection
@@ -118,6 +128,8 @@ export default async function HomePage() {
             subheading={featuredToolsSubhead}
           />
         )}
+
+        <NewsletterSection />
 
         <CtaSection
           heading={bottomCtaHeading}

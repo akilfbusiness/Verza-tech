@@ -34,8 +34,8 @@ const FALLBACK_NAV_ITEMS: NavItem[] = [
 
 const FALLBACK_CTA = { label: 'Browse Reviews', link: '/blog', style: 'primary' as const }
 
-const HERO_BG = '#080808'
-const GOLD    = 'oklch(0.62 0.18 55)'
+const HERO_BG = '#07080c'
+const ACCENT  = 'oklch(0.72 0.1 255)'
 
 export function SiteNav({ categories = [], navigation, siteSettings }: SiteNavProps) {
   const [mobileOpen,    setMobileOpen]    = useState(false)
@@ -217,7 +217,7 @@ export function SiteNav({ categories = [], navigation, siteSettings }: SiteNavPr
                 className="px-5 py-2.5 text-sm tracking-wide transition-all duration-300"
                 style={
                   isDark
-                    ? { background: GOLD, color: HERO_BG }
+                    ? { background: ACCENT, color: HERO_BG }
                     : { border: '1px solid var(--primary)', color: 'var(--primary)' }
                 }
                 onMouseEnter={(e) => {
