@@ -21,10 +21,13 @@ const FALLBACK_NAV_ITEMS: NavItem[] = [
 
 const FALLBACK_CTA = { label: 'Browse Reviews', link: '/blog', style: 'primary' as const }
 
+const HERO_BG = '#080808'
+const GOLD    = 'oklch(0.62 0.18 55)'
+
 export function SiteNav({ categories = [], navigation, siteSettings }: SiteNavProps) {
-  const [mobileOpen, setMobileOpen] = useState(false)
-  const [openDropdown, setOpenDropdown] = useState<string | null>(null)
-  const [scrolled, setScrolled] = useState(false)
+  const [mobileOpen,    setMobileOpen]    = useState(false)
+  const [openDropdown,  setOpenDropdown]  = useState<string | null>(null)
+  const [scrolled,      setScrolled]      = useState(false)
   const pathname = usePathname()
 
   useEffect(() => {
@@ -32,6 +35,9 @@ export function SiteNav({ categories = [], navigation, siteSettings }: SiteNavPr
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
+
+  const isHome  = pathname === '/'
+  const isDark  = isHome && !scrolled
 
   const isActive = (href?: string) =>
     href ? pathname === href || pathname.startsWith(href + '/') : false
@@ -55,19 +61,26 @@ export function SiteNav({ categories = [], navigation, siteSettings }: SiteNavPr
     const hasDropdown       = hasBlogDropdown || hasManualDropdown
     const key               = item.label
 
+    const baseLinkCls = isDark
+      ? 'relative px-1 py-2 text-sm tracking-wide transition-colors duration-200 after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:transition-all after:duration-300 hover:after:w-full'
+      : 'relative px-1 py-2 text-sm tracking-wide transition-colors duration-200 after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-primary after:transition-all after:duration-300 hover:after:w-full'
+
     if (!hasDropdown) {
+      const active = isActive(item.href)
       return (
         <Link
           key={key}
           href={item.href || '#'}
           target={item.openInNewTab ? '_blank' : undefined}
           rel={item.openInNewTab ? 'noopener noreferrer' : undefined}
-          className={`relative px-1 py-2 text-sm tracking-wide transition-colors duration-200
-            after:absolute after:bottom-0 after:left-0 after:h-px after:w-0
-            after:bg-primary after:transition-all after:duration-300 hover:after:w-full ${
-            isActive(item.href)
-              ? 'text-primary after:w-full'
-              : 'text-foreground/70 hover:text-foreground'
+          className={`${baseLinkCls} ${
+            isDark
+              ? active
+                ? 'text-white after:w-full'
+                : 'text-white/55 hover:text-white after:bg-white/40'
+              : active
+                ? 'text-primary after:w-full'
+                : 'text-foreground/70 hover:text-foreground'
           }`}
         >
           {item.label}
@@ -83,7 +96,9 @@ export function SiteNav({ categories = [], navigation, siteSettings }: SiteNavPr
           onClick={() => setOpenDropdown(isOpen ? null : key)}
           onBlur={() => setTimeout(() => setOpenDropdown(null), 150)}
           className={`flex items-center gap-1 px-1 py-2 text-sm tracking-wide transition-colors duration-200 ${
-            isActive(item.href) ? 'text-primary' : 'text-foreground/70 hover:text-foreground'
+            isDark
+              ? isActive(item.href) ? 'text-white' : 'text-white/55 hover:text-white'
+              : isActive(item.href) ? 'text-primary' : 'text-foreground/70 hover:text-foreground'
           }`}
           aria-expanded={isOpen}
           aria-haspopup="true"
@@ -152,19 +167,26 @@ export function SiteNav({ categories = [], navigation, siteSettings }: SiteNavPr
 
   return (
     <header
-      className={`sticky top-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? 'bg-background/98 backdrop-blur-md border-b border-border shadow-sm'
-          : 'bg-background border-b border-border'
-      }`}
+      className="sticky top-0 z-50 transition-all duration-400"
+      style={
+        isDark
+          ? { background: HERO_BG, borderBottom: '1px solid rgba(255,255,255,0.06)' }
+          : scrolled
+            ? { background: 'rgba(255,255,255,0.98)', backdropFilter: 'blur(12px)', borderBottom: '1px solid var(--border)', boxShadow: '0 1px 0 var(--border)' }
+            : { background: 'var(--background)', borderBottom: '1px solid var(--border)' }
+      }
     >
       <div className="container mx-auto px-6 max-w-7xl">
         <div className="flex items-center justify-between py-4">
           {/* Logo */}
           <Link
             href="/"
-            className="text-xl font-medium tracking-tight text-foreground hover:text-primary transition-colors duration-200"
-            style={{ fontFamily: 'var(--font-cormorant), Georgia, serif', fontSize: '1.5rem' }}
+            className="font-medium tracking-tight transition-colors duration-300"
+            style={{
+              fontFamily: 'var(--font-cormorant), Georgia, serif',
+              fontSize: '1.5rem',
+              color: isDark ? '#ffffff' : 'var(--foreground)',
+            }}
           >
             {siteName}
           </Link>
@@ -179,7 +201,24 @@ export function SiteNav({ categories = [], navigation, siteSettings }: SiteNavPr
             <div className="hidden md:flex items-center">
               <Link
                 href={ctaLink}
-                className="px-5 py-2.5 text-sm tracking-wide border border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300"
+                className="px-5 py-2.5 text-sm tracking-wide transition-all duration-300"
+                style={
+                  isDark
+                    ? { background: GOLD, color: HERO_BG }
+                    : { border: '1px solid var(--primary)', color: 'var(--primary)' }
+                }
+                onMouseEnter={(e) => {
+                  if (!isDark) {
+                    ;(e.currentTarget as HTMLAnchorElement).style.background = 'var(--primary)'
+                    ;(e.currentTarget as HTMLAnchorElement).style.color = 'var(--primary-foreground)'
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isDark) {
+                    ;(e.currentTarget as HTMLAnchorElement).style.background = ''
+                    ;(e.currentTarget as HTMLAnchorElement).style.color = 'var(--primary)'
+                  }
+                }}
               >
                 {ctaLabel}
               </Link>
@@ -188,7 +227,8 @@ export function SiteNav({ categories = [], navigation, siteSettings }: SiteNavPr
 
           {/* Mobile toggle */}
           <button
-            className="md:hidden p-2 text-foreground/70 hover:text-foreground transition-colors"
+            className="md:hidden p-2 transition-colors"
+            style={{ color: isDark ? 'rgba(255,255,255,0.6)' : 'var(--foreground)' }}
             onClick={() => setMobileOpen(!mobileOpen)}
             aria-label="Toggle navigation menu"
             aria-expanded={mobileOpen}

@@ -14,9 +14,9 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.1 0 0);
 
-  /* Gold accent — warm champagne */
-  --primary: oklch(0.48 0.08 55);
-  --primary-foreground: oklch(1 0 0);
+  /* Gold accent — warm amber */
+  --primary: oklch(0.62 0.18 55);
+  --primary-foreground: oklch(0.06 0 0);
 
   --secondary: oklch(0.97 0.005 55);
   --secondary-foreground: oklch(0.1 0 0);
@@ -45,7 +45,7 @@
 
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.1 0 0);
-  --sidebar-primary: oklch(0.48 0.08 55);
+  --sidebar-primary: oklch(0.62 0.18 55);
   --sidebar-primary-foreground: oklch(1 0 0);
   --sidebar-accent: oklch(0.97 0.005 55);
   --sidebar-accent-foreground: oklch(0.1 0 0);
