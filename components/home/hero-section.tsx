@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { motion, useScroll, useTransform } from 'framer-motion'
-import { useRef } from 'react'
+import { useRef, useEffect } from 'react'
 
 interface HeroSectionProps {
   headline: string
@@ -15,7 +15,7 @@ interface HeroSectionProps {
 
 const ease: [number, number, number, number] = [0.22, 1, 0.36, 1]
 const HERO_BG = '#080808'
-const GOLD = 'oklch(0.62 0.18 55)'
+const GOLD    = 'oklch(0.62 0.18 55)'
 
 export function HeroSection({
   headline,
@@ -29,6 +29,12 @@ export function HeroSection({
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] })
   const contentY       = useTransform(scrollYProgress, [0, 1], ['0%', '18%'])
   const contentOpacity = useTransform(scrollYProgress, [0, 0.55], [1, 0])
+
+  // Signal to the nav that this page has a dark hero
+  useEffect(() => {
+    document.body.setAttribute('data-dark-hero', 'true')
+    return () => document.body.removeAttribute('data-dark-hero')
+  }, [])
 
   const words = headline.split(' ')
 
@@ -122,7 +128,7 @@ export function HeroSection({
                 href={secondaryLink}
                 className="inline-flex items-center justify-center px-7 py-4 text-[11px] tracking-[0.25em] uppercase border border-white/15 text-white/45 hover:border-white/35 hover:text-white/70 transition-all duration-300"
               >
-                {secondaryLabel}
+                {secondaryLink === '/reviews' ? 'Read Reviews' : secondaryLabel}
               </Link>
             </div>
           </motion.div>
@@ -138,20 +144,19 @@ export function HeroSection({
         />
       </motion.div>
 
-      {/* Giant ghost brand letters — Arrodz style */}
+      {/* Giant solid brand letters at bottom — Arrodz style */}
       <div className="overflow-hidden pointer-events-none select-none" aria-hidden>
         <motion.p
           className="font-bold uppercase leading-none"
           style={{
             fontFamily: 'var(--font-cormorant), Georgia, serif',
-            fontSize: 'clamp(6rem, 24vw, 20rem)',
+            fontSize: 'clamp(7rem, 26vw, 22rem)',
             letterSpacing: '-0.045em',
-            color: 'transparent',
-            WebkitTextStroke: '1px rgba(255,255,255,0.055)',
+            color: 'rgba(255,255,255,0.07)',
             marginBottom: '-0.12em',
             lineHeight: 0.85,
           }}
-          initial={{ opacity: 0, y: 50 }}
+          initial={{ opacity: 0, y: 60 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.3, delay: 0.6, ease }}
         >

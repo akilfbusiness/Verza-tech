@@ -6,6 +6,19 @@ import { usePathname } from 'next/navigation'
 import { Menu, X, ChevronDown, ChevronRight } from 'lucide-react'
 import type { Category, Navigation, SiteSettings, NavItem } from '@/lib/sanity.types'
 
+// Reads the data-dark-hero attribute set by HeroSection when a dark hero is mounted
+function useDarkHero() {
+  const [dark, setDark] = useState(false)
+  useEffect(() => {
+    const check = () => setDark(document.body.hasAttribute('data-dark-hero'))
+    check()
+    const observer = new MutationObserver(check)
+    observer.observe(document.body, { attributes: true, attributeFilter: ['data-dark-hero'] })
+    return () => observer.disconnect()
+  }, [])
+  return dark
+}
+
 interface SiteNavProps {
   categories?: Category[]
   navigation?: Navigation | null
@@ -28,7 +41,8 @@ export function SiteNav({ categories = [], navigation, siteSettings }: SiteNavPr
   const [mobileOpen,    setMobileOpen]    = useState(false)
   const [openDropdown,  setOpenDropdown]  = useState<string | null>(null)
   const [scrolled,      setScrolled]      = useState(false)
-  const pathname = usePathname()
+  const pathname  = usePathname()
+  const heroIsDark = useDarkHero()
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20)
@@ -36,8 +50,7 @@ export function SiteNav({ categories = [], navigation, siteSettings }: SiteNavPr
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  const isHome  = pathname === '/'
-  const isDark  = isHome && !scrolled
+  const isDark = heroIsDark && !scrolled
 
   const isActive = (href?: string) =>
     href ? pathname === href || pathname.startsWith(href + '/') : false
