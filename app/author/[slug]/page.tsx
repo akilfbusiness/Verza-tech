@@ -2,17 +2,30 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { CalendarDays, Clock, Twitter, Linkedin, Globe, Award, Briefcase, Star } from 'lucide-react'
+import { Twitter, Linkedin, Globe } from 'lucide-react'
 import { getAuthorBySlug, getBlogPostsByAuthor, getAllAuthorSlugs } from '@/lib/sanity.queries'
-import { urlForImage } from '@/lib/sanity.image'
-import { Breadcrumb } from '@/components/breadcrumb'
+import { urlForImage, urlForImageSafe } from '@/lib/sanity.image'
 import { generatePersonSchema, generateBreadcrumbSchema, renderJsonLd } from '@/lib/schema'
+import { ContentCard } from '@/components/ui/content-card'
+import { StaggerChildren } from '@/components/animations/stagger-children'
 
 export const revalidate = 60
 export const dynamicParams = true
 
 interface Props {
   params: Promise<{ slug: string }>
+}
+
+const HERO_BG = '#07080c'
+const ACCENT  = 'oklch(0.72 0.1 255)'
+
+const ARTICLE_TYPE_LABELS: Record<string, string> = {
+  review: 'Review',
+  comparison: 'Comparison',
+  'best-of': 'Best Of',
+  tutorial: 'Tutorial',
+  news: 'News',
+  opinion: 'Opinion',
 }
 
 export async function generateStaticParams() {
@@ -42,19 +55,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         ? [{ url: urlForImage(author.image).width(400).height(400).url(), width: 400, height: 400 }]
         : [{ url: `${siteUrl}/api/og?title=${encodeURIComponent(author.name)}&type=author`, width: 1200, height: 630 }],
     },
-    alternates: {
-      canonical: `${siteUrl}/author/${slug}`,
-    },
+    alternates: { canonical: `${siteUrl}/author/${slug}` },
   }
-}
-
-const ARTICLE_TYPE_LABELS: Record<string, string> = {
-  review: 'Review',
-  comparison: 'Comparison',
-  'best-of': 'Best Of',
-  tutorial: 'Tutorial',
-  news: 'News',
-  opinion: 'Opinion',
 }
 
 export default async function AuthorPage({ params }: Props) {
@@ -81,9 +83,7 @@ export default async function AuthorPage({ params }: Props) {
     }),
     ...(author.certifications?.length && { hasCredential: author.certifications }),
     ...(author.expertise?.length && { knowsAbout: author.expertise }),
-    ...(author.image && {
-      image: urlForImage(author.image).width(400).height(400).url(),
-    }),
+    ...(author.image && { image: urlForImage(author.image).width(400).height(400).url() }),
     ...(author.socialLinks && {
       sameAs: [
         author.socialLinks.twitter,
@@ -91,211 +91,197 @@ export default async function AuthorPage({ params }: Props) {
         author.socialLinks.website,
       ].filter(Boolean),
     }),
-    worksFor: {
-      '@type': 'Organization',
-      name: 'Verza',
-      url: siteUrl,
-    },
+    worksFor: { '@type': 'Organization', name: 'Verza', url: siteUrl },
   }
 
   const breadcrumbSchema = generateBreadcrumbSchema([
     { name: 'Home', url: siteUrl },
-    { name: 'Authors', url: `${siteUrl}/author` },
+    { name: 'Blog', url: `${siteUrl}/blog` },
     { name: author.name },
   ])
+
+  const avatarSrc = author.image ? urlForImage(author.image).width(192).height(192).url() : null
 
   return (
     <>
       {renderJsonLd(personSchema)}
       {renderJsonLd(breadcrumbSchema)}
 
-      <div className="min-h-screen bg-background">
-        {/* Profile header */}
-        <header className="border-b bg-secondary/20">
-          <div className="container mx-auto px-4 py-10 max-w-5xl">
-            <Breadcrumb items={[
-              { label: 'Blog', href: '/blog' },
-              { label: author.name, href: `/author/${slug}` },
-            ]} />
+      {/* ── Dark author hero ─────────────────────────────────────────── */}
+      <section
+        className="relative overflow-hidden border-b border-border"
+        style={{ background: HERO_BG }}
+      >
+        <div
+          className="absolute pointer-events-none"
+          style={{
+            top: '-10%', right: '5%',
+            width: '40vw', height: '40vw',
+            maxWidth: '500px', maxHeight: '500px',
+            background: 'radial-gradient(circle, oklch(0.72 0.1 255 / 0.06) 0%, transparent 65%)',
+            filter: 'blur(60px)',
+          }}
+        />
 
-            <div className="flex flex-col sm:flex-row items-start gap-6 mt-6">
-              {/* Avatar */}
-              <div className="w-24 h-24 rounded-2xl overflow-hidden bg-secondary flex-shrink-0 border-2 border-border">
-                {author.image ? (
-                  <Image
-                    src={urlForImage(author.image).width(192).height(192).url()}
-                    alt={author.name}
-                    width={96}
-                    height={96}
-                    className="object-cover w-full h-full"
-                    priority
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-primary/10">
-                    <span className="text-3xl font-bold text-primary">
-                      {author.name.charAt(0)}
-                    </span>
-                  </div>
+        <div className="relative container mx-auto px-6 max-w-7xl py-20 md:py-28">
+          {/* Breadcrumb */}
+          <nav aria-label="Breadcrumb" className="mb-10">
+            <ol className="flex items-center gap-2 text-xs tracking-wide text-white/25">
+              <li><Link href="/" className="hover:text-white/50 transition-colors">Home</Link></li>
+              <li className="flex items-center gap-2"><span aria-hidden>/</span><Link href="/blog" className="hover:text-white/50 transition-colors">Blog</Link></li>
+              <li className="flex items-center gap-2"><span aria-hidden>/</span><span className="text-white/45">{author.name}</span></li>
+            </ol>
+          </nav>
+
+          <div className="flex flex-col sm:flex-row items-start gap-8">
+            {/* Avatar */}
+            <div className="w-20 h-20 overflow-hidden bg-white/5 flex-shrink-0 border border-white/10">
+              {avatarSrc ? (
+                <Image src={avatarSrc} alt={author.name} width={80} height={80} className="object-cover w-full h-full" priority />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <span
+                    className="font-bold text-white/30"
+                    style={{ fontFamily: 'var(--font-display), sans-serif', fontSize: '2rem' }}
+                  >
+                    {author.name.charAt(0)}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Info */}
+            <div className="flex-1">
+              <p className="text-[10px] font-semibold tracking-[0.3em] uppercase mb-3" style={{ color: ACCENT }}>
+                Author
+              </p>
+              <h1
+                className="text-white font-light leading-tight mb-2"
+                style={{
+                  fontFamily: 'var(--font-display), sans-serif',
+                  fontSize: 'clamp(2rem, 4vw, 3.5rem)',
+                  letterSpacing: '-0.01em',
+                }}
+              >
+                {author.name}
+              </h1>
+              {author.role && (
+                <p className="text-sm mb-4" style={{ color: ACCENT }}>{author.role}</p>
+              )}
+              {author.bio && (
+                <p className="text-white/40 text-sm leading-relaxed max-w-2xl mb-6">{author.bio}</p>
+              )}
+
+              {/* Credentials */}
+              <div className="flex flex-wrap gap-2 mb-6">
+                {author.yearsOfExperience && (
+                  <span className="text-[10px] font-medium tracking-[0.12em] uppercase border border-white/15 text-white/50 px-2.5 py-1">
+                    {author.yearsOfExperience}+ yrs experience
+                  </span>
                 )}
+                {author.certifications?.map((cert) => (
+                  <span key={cert} className="text-[10px] font-medium tracking-[0.12em] uppercase border border-white/15 text-white/50 px-2.5 py-1">
+                    {cert}
+                  </span>
+                ))}
+                {author.expertise?.map((area) => (
+                  <span key={area} className="text-[10px] font-medium tracking-[0.12em] uppercase border border-white/10 text-white/35 px-2.5 py-1">
+                    {area}
+                  </span>
+                ))}
               </div>
 
-              {/* Info */}
-              <div className="flex-1">
-                <h1 className="text-3xl font-bold text-balance">{author.name}</h1>
-                {author.role && (
-                  <p className="text-base text-primary font-medium mt-1">{author.role}</p>
-                )}
-                {author.bio && (
-                  <p className="text-muted-foreground leading-relaxed mt-3 max-w-2xl">
-                    {author.bio}
-                  </p>
-                )}
-
-                {/* E-E-A-T credentials row */}
-                <div className="flex flex-wrap gap-3 mt-4">
-                  {author.yearsOfExperience && (
-                    <div className="flex items-center gap-1.5 text-sm bg-secondary px-3 py-1.5 rounded-full">
-                      <Briefcase className="w-3.5 h-3.5 text-primary" aria-hidden="true" />
-                      <span>{author.yearsOfExperience}+ years experience</span>
-                    </div>
+              {/* Social links */}
+              {author.socialLinks && (
+                <div className="flex gap-5">
+                  {author.socialLinks.twitter && (
+                    <a
+                      href={author.socialLinks.twitter}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 text-xs text-white/35 hover:text-white/60 transition-colors"
+                      aria-label={`${author.name} on Twitter/X`}
+                    >
+                      <Twitter className="w-3.5 h-3.5" aria-hidden="true" />
+                      Twitter/X
+                    </a>
                   )}
-                  {author.certifications?.map((cert) => (
-                    <div key={cert} className="flex items-center gap-1.5 text-sm bg-secondary px-3 py-1.5 rounded-full">
-                      <Award className="w-3.5 h-3.5 text-primary" aria-hidden="true" />
-                      <span>{cert}</span>
-                    </div>
-                  ))}
-                  {author.expertise?.map((area) => (
-                    <div key={area} className="flex items-center gap-1.5 text-sm border px-3 py-1.5 rounded-full text-muted-foreground">
-                      <Star className="w-3 h-3" aria-hidden="true" />
-                      <span>{area}</span>
-                    </div>
-                  ))}
+                  {author.socialLinks.linkedin && (
+                    <a
+                      href={author.socialLinks.linkedin}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 text-xs text-white/35 hover:text-white/60 transition-colors"
+                      aria-label={`${author.name} on LinkedIn`}
+                    >
+                      <Linkedin className="w-3.5 h-3.5" aria-hidden="true" />
+                      LinkedIn
+                    </a>
+                  )}
+                  {author.socialLinks.website && (
+                    <a
+                      href={author.socialLinks.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 text-xs text-white/35 hover:text-white/60 transition-colors"
+                      aria-label={`${author.name}'s website`}
+                    >
+                      <Globe className="w-3.5 h-3.5" aria-hidden="true" />
+                      Website
+                    </a>
+                  )}
                 </div>
+              )}
+            </div>
 
-                {/* Social links */}
-                {author.socialLinks && (
-                  <div className="flex gap-3 mt-4">
-                    {author.socialLinks.twitter && (
-                      <a
-                        href={author.socialLinks.twitter}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                        aria-label={`${author.name} on Twitter/X`}
-                      >
-                        <Twitter className="w-4 h-4" aria-hidden="true" />
-                        <span>Twitter/X</span>
-                      </a>
-                    )}
-                    {author.socialLinks.linkedin && (
-                      <a
-                        href={author.socialLinks.linkedin}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                        aria-label={`${author.name} on LinkedIn`}
-                      >
-                        <Linkedin className="w-4 h-4" aria-hidden="true" />
-                        <span>LinkedIn</span>
-                      </a>
-                    )}
-                    {author.socialLinks.website && (
-                      <a
-                        href={author.socialLinks.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                        aria-label={`${author.name}'s website`}
-                      >
-                        <Globe className="w-4 h-4" aria-hidden="true" />
-                        <span>Website</span>
-                      </a>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* Stats */}
-              <div className="flex sm:flex-col gap-4 sm:gap-2 sm:text-right flex-shrink-0">
-                <div>
-                  <p className="text-2xl font-bold">{posts.length}</p>
-                  <p className="text-xs text-muted-foreground">Articles</p>
-                </div>
-              </div>
+            {/* Article count */}
+            <div className="shrink-0 text-right">
+              <p
+                className="font-light leading-none"
+                style={{ fontFamily: 'var(--font-display), sans-serif', fontSize: '3rem', color: 'rgba(255,255,255,0.15)' }}
+              >
+                {posts.length}
+              </p>
+              <p className="text-[10px] tracking-[0.2em] uppercase mt-1" style={{ color: 'rgba(255,255,255,0.25)' }}>Articles</p>
             </div>
           </div>
-        </header>
 
-        {/* Articles */}
-        <main className="container mx-auto px-4 py-12 max-w-5xl">
-          <h2 className="text-xl font-bold mb-6">
+          <div className="mt-12 h-px" style={{ background: 'rgba(255,255,255,0.07)' }} />
+        </div>
+      </section>
+
+      {/* ── Articles grid ─────────────────────────────────────────────── */}
+      <section className="py-16 md:py-24 bg-background">
+        <div className="container mx-auto px-6 max-w-7xl">
+          <p className="text-[10px] font-semibold tracking-[0.25em] uppercase text-primary mb-8">
             Articles by {author.name}
-            <span className="text-muted-foreground font-normal text-base ml-2">({posts.length})</span>
-          </h2>
+            <span className="text-muted-foreground ml-2 font-normal normal-case tracking-normal">({posts.length})</span>
+          </p>
 
           {posts.length === 0 ? (
-            <p className="text-muted-foreground">No articles published yet.</p>
+            <p className="text-muted-foreground text-sm">No articles published yet.</p>
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <StaggerChildren className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-border">
               {posts.map((post: any) => (
-                <article
+                <ContentCard
                   key={post._id}
-                  className="group border rounded-xl overflow-hidden hover:border-primary hover:shadow-md transition-all flex flex-col"
-                >
-                  {post.heroImage && (
-                    <Link href={`/blog/${post.slug.current}`} className="block relative h-40 overflow-hidden flex-shrink-0">
-                      <Image
-                        src={urlForImage(post.heroImage).width(500).height(280).url()}
-                        alt={post.heroImage.alt || post.title}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                      {post.articleType && (
-                        <div className="absolute top-2 left-2">
-                          <span className="px-2 py-0.5 rounded text-xs font-semibold bg-background/90 backdrop-blur-sm">
-                            {ARTICLE_TYPE_LABELS[post.articleType]}
-                          </span>
-                        </div>
-                      )}
-                    </Link>
-                  )}
-                  <div className="p-4 flex flex-col flex-1">
-                    <Link href={`/blog/${post.slug.current}`}>
-                      <h3 className="font-semibold text-sm leading-snug mb-2 group-hover:text-primary transition-colors line-clamp-2 text-balance">
-                        {post.title}
-                      </h3>
-                    </Link>
-                    {post.summary && (
-                      <p className="text-xs text-muted-foreground line-clamp-2 mb-3 flex-1 leading-relaxed">
-                        {post.summary}
-                      </p>
-                    )}
-                    <div className="flex items-center gap-3 mt-auto pt-3 border-t text-xs text-muted-foreground">
-                      {post.publishedAt && (
-                        <div className="flex items-center gap-1">
-                          <CalendarDays className="w-3 h-3" aria-hidden="true" />
-                          <time dateTime={post.publishedAt}>
-                            {new Date(post.publishedAt).toLocaleDateString('en-AU', {
-                              day: 'numeric', month: 'short', year: 'numeric',
-                            })}
-                          </time>
-                        </div>
-                      )}
-                      {post.estimatedReadTime && (
-                        <div className="flex items-center gap-1 ml-auto">
-                          <Clock className="w-3 h-3" aria-hidden="true" />
-                          <span>{post.estimatedReadTime} min</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </article>
+                  href={`/blog/${post.slug.current}`}
+                  image={urlForImageSafe(post.heroImage) ?? undefined}
+                  imageAlt={post.title}
+                  label={post.articleType ? ARTICLE_TYPE_LABELS[post.articleType] : post.categories?.[0]?.name}
+                  title={post.title}
+                  description={post.summary}
+                  meta={post.publishedAt
+                    ? new Date(post.publishedAt).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })
+                    : undefined
+                  }
+                  className="bg-background"
+                />
               ))}
-            </div>
+            </StaggerChildren>
           )}
-        </main>
-      </div>
+        </div>
+      </section>
     </>
   )
 }

@@ -233,26 +233,41 @@ export default async function BlogArticlePage({ params }: Props) {
 
       <ReadingProgress />
 
-      <div className="min-h-screen bg-background">
+      <div className="bg-background">
 
-        {/* ── Hero header ──────────────────────────────────────────────── */}
-        <header className="border-b bg-secondary/20">
-          <div className="container mx-auto px-4 py-8 max-w-4xl">
-
+        {/* ── Dark hero header ─────────────────────────────────────────── */}
+        <header className="relative overflow-hidden border-b border-border" style={{ background: '#07080c' }}>
+          <div
+            className="absolute pointer-events-none"
+            style={{
+              top: '-10%', right: '5%',
+              width: '40vw', height: '40vw', maxWidth: '500px', maxHeight: '500px',
+              background: 'radial-gradient(circle, oklch(0.72 0.1 255 / 0.06) 0%, transparent 65%)',
+              filter: 'blur(60px)',
+            }}
+          />
+          <div className="relative container mx-auto px-6 max-w-4xl py-16 md:py-24">
             {/* Breadcrumb */}
-            <Breadcrumb items={[
-              { label: 'Blog', href: '/blog' },
-              ...(post.categories?.[0] ? [{
-                label: post.categories[0].name,
-                href: `/blog/category/${post.categories[0].slug.current}`,
-              }] : []),
-              { label: post.title, href: `/blog/${slug}` },
-            ]} />
+            <nav aria-label="Breadcrumb" className="mb-8">
+              <ol className="flex items-center gap-2 text-xs tracking-wide text-white/25">
+                <li><Link href="/" className="hover:text-white/50 transition-colors">Home</Link></li>
+                <li className="flex items-center gap-2"><span aria-hidden>/</span><Link href="/blog" className="hover:text-white/50 transition-colors">Blog</Link></li>
+                {post.categories?.[0] && (
+                  <li className="flex items-center gap-2">
+                    <span aria-hidden>/</span>
+                    <Link href={`/blog/category/${post.categories[0].slug.current}`} className="hover:text-white/50 transition-colors">
+                      {post.categories[0].name}
+                    </Link>
+                  </li>
+                )}
+                <li className="flex items-center gap-2"><span aria-hidden>/</span><span className="text-white/45 truncate max-w-[200px]">{post.title}</span></li>
+              </ol>
+            </nav>
 
-            {/* Type + category tags */}
-            <div className="flex items-center gap-2 mt-4 flex-wrap">
+            {/* Type + category chips */}
+            <div className="flex items-center gap-2 mb-5 flex-wrap">
               {post.articleType && (
-                <span className="px-3 py-1 rounded-full text-xs font-semibold bg-primary text-primary-foreground">
+                <span className="text-[10px] font-semibold tracking-[0.25em] uppercase px-2.5 py-1 border" style={{ borderColor: 'oklch(0.72 0.1 255 / 0.5)', color: 'oklch(0.72 0.1 255)' }}>
                   {ARTICLE_TYPE_LABELS[post.articleType]}
                 </span>
               )}
@@ -260,7 +275,7 @@ export default async function BlogArticlePage({ params }: Props) {
                 <Link
                   key={cat._id}
                   href={`/blog/category/${cat.slug.current}`}
-                  className="px-3 py-1 rounded-full text-xs font-medium border hover:border-primary hover:text-primary transition-colors"
+                  className="text-[10px] font-medium tracking-[0.12em] uppercase border border-white/20 text-white/50 px-2.5 py-1 hover:border-white/40 hover:text-white/70 transition-colors"
                 >
                   {cat.name}
                 </Link>
@@ -268,43 +283,42 @@ export default async function BlogArticlePage({ params }: Props) {
             </div>
 
             {/* Title */}
-            <h1 className="text-3xl md:text-4xl font-bold mt-4 mb-3 text-balance leading-tight">
+            <h1
+              className="text-white font-light leading-tight mb-4 text-balance"
+              style={{
+                fontFamily: 'var(--font-display), sans-serif',
+                fontSize: 'clamp(2rem, 4vw, 3.5rem)',
+                letterSpacing: '-0.01em',
+              }}
+            >
               {post.title}
             </h1>
 
-            {/* Summary / TLDR */}
+            {/* Summary */}
             {post.summary && (
-              <p id="article-summary" className="text-lg text-muted-foreground leading-relaxed mb-5">
+              <p id="article-summary" className="text-white/45 text-sm leading-relaxed mb-8 max-w-2xl">
                 {post.summary}
               </p>
             )}
 
             {/* Meta row */}
-            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-xs text-white/35">
               {post.author && (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2.5">
                   {urlForImageSafe(post.author.image) && (
-                    <div className="w-8 h-8 rounded-full overflow-hidden bg-secondary flex-shrink-0 border">
-                      <Image
-                        src={urlForImageSafe(post.author.image)!}
-                        alt={post.author.name}
-                        width={32}
-                        height={32}
-                        className="object-cover w-full h-full"
-                      />
+                    <div className="w-7 h-7 overflow-hidden bg-white/10 flex-shrink-0 border border-white/15">
+                      <Image src={urlForImageSafe(post.author.image)!} alt={post.author.name} width={28} height={28} className="object-cover w-full h-full" />
                     </div>
                   )}
                   <div>
-                    <span className="font-medium text-foreground">{post.author.name}</span>
-                    {post.author.role && (
-                      <span className="text-xs text-muted-foreground ml-1.5">— {post.author.role}</span>
-                    )}
+                    <span className="font-medium text-white/70">{post.author.name}</span>
+                    {post.author.role && <span className="text-white/30 ml-1.5">— {post.author.role}</span>}
                   </div>
                 </div>
               )}
               {post.publishedAt && (
                 <div className="flex items-center gap-1.5">
-                  <CalendarDays className="w-3.5 h-3.5" aria-hidden="true" />
+                  <CalendarDays className="w-3 h-3" aria-hidden="true" />
                   <time dateTime={post.publishedAt}>
                     {new Date(post.publishedAt).toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' })}
                   </time>
@@ -312,12 +326,12 @@ export default async function BlogArticlePage({ params }: Props) {
               )}
               {post.estimatedReadTime && (
                 <div className="flex items-center gap-1.5">
-                  <Clock className="w-3.5 h-3.5" aria-hidden="true" />
+                  <Clock className="w-3 h-3" aria-hidden="true" />
                   <span>{post.estimatedReadTime} min read</span>
                 </div>
               )}
               {post.updatedAt && (
-                <div className="flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-secondary border font-medium text-foreground">
+                <div className="flex items-center gap-1.5 border border-white/15 px-2.5 py-1">
                   <RefreshCw className="w-3 h-3" aria-hidden="true" />
                   Last verified:{' '}
                   <time dateTime={post.updatedAt} className="ml-1">
@@ -329,17 +343,19 @@ export default async function BlogArticlePage({ params }: Props) {
 
             {/* Affiliate disclosure */}
             {post.affiliateDisclosure && (
-              <div className="mt-4 px-4 py-2.5 rounded-lg bg-yellow-50 border border-yellow-200 text-xs text-yellow-800">
-                <strong>Affiliate Disclosure:</strong> Some links in this article are affiliate links. If you purchase through them, we may earn a commission at no extra cost to you. This does not influence our editorial opinions.
+              <div className="mt-6 px-4 py-3 border border-white/10 text-xs text-white/35">
+                <strong className="text-white/50">Affiliate Disclosure:</strong> Some links in this article are affiliate links. If you purchase through them, we may earn a commission at no extra cost to you. This does not influence our editorial opinions.
               </div>
             )}
+
+            <div className="mt-10 h-px" style={{ background: 'rgba(255,255,255,0.07)' }} />
           </div>
         </header>
 
         {/* ── Hero image ───────────────────────────────────────────────── */}
         {urlForImageSafe(post.heroImage) && (
           <div className="container mx-auto px-4 max-w-4xl mt-8">
-            <figure className="relative rounded-xl overflow-hidden border aspect-video">
+            <figure className="relative overflow-hidden border border-border aspect-video">
               <Image
                 src={urlForImageSafe(post.heroImage)!}
                 alt={post.heroImage?.alt || post.title}
@@ -356,13 +372,13 @@ export default async function BlogArticlePage({ params }: Props) {
 
           {/* 1. Key Points / Quick Answers */}
           {post.keyPoints?.length > 0 && (
-            <section className="mb-8 p-6 rounded-xl bg-secondary/50 border" aria-label="Key Takeaways">
+            <section className="mb-8 p-6 border border-border bg-background" aria-label="Key Takeaways">
               <h2 className="font-bold text-lg mb-4">Key Takeaways</h2>
               <ul className="space-y-3">
                 {post.keyPoints.map((kp: any, i: number) => (
                   <li key={i}>
                     <div className="flex items-start gap-3">
-                      <span className="mt-0.5 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold flex-shrink-0">
+                      <span className="mt-0.5 w-6 h-6 bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold flex-shrink-0">
                         {i + 1}
                       </span>
                       <div>
@@ -401,7 +417,7 @@ export default async function BlogArticlePage({ params }: Props) {
 
           {/* 4. Article Answer Capsule — AEO direct answer, pulled verbatim by AI engines */}
           {post.articleAnswerCapsule && (
-            <div id="article-answer-capsule" className="mt-6 px-5 py-4 rounded-xl border-l-4 border-primary bg-primary/5">
+            <div id="article-answer-capsule" className="mt-6 px-5 py-4 border-l-4 border-primary bg-primary/5">
               <p className="text-base font-medium leading-relaxed text-foreground">
                 {post.articleAnswerCapsule}
               </p>
@@ -421,7 +437,7 @@ export default async function BlogArticlePage({ params }: Props) {
               {post.videoTitle && (
                 <h2 className="text-xl font-bold mb-3">{post.videoTitle}</h2>
               )}
-              <div className="relative rounded-xl overflow-hidden border aspect-video">
+              <div className="relative overflow-hidden border border-border aspect-video">
                 <iframe
                   src={`https://www.youtube.com/embed/${youtubeId}`}
                   title={post.videoTitle || post.title}
@@ -457,7 +473,7 @@ export default async function BlogArticlePage({ params }: Props) {
 
           {/* 7. Decision Framework */}
           {post.decisionFramework?.steps?.length > 0 && (
-            <section className="my-10 border rounded-xl p-6 bg-secondary/30" aria-label="Decision framework">
+            <section className="my-10 border border-border p-6 bg-background" aria-label="Decision framework">
               {post.decisionFramework.frameworkName && (
                 <h2 className="text-xl font-bold mb-5 text-balance">
                   {post.decisionFramework.frameworkName}
@@ -466,7 +482,7 @@ export default async function BlogArticlePage({ params }: Props) {
               <ol className="space-y-4">
                 {post.decisionFramework.steps.map((step: any, i: number) => (
                   <li key={i} className="flex gap-4">
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">
+                    <div className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">
                       {i + 1}
                     </div>
                     <div>
@@ -481,7 +497,7 @@ export default async function BlogArticlePage({ params }: Props) {
 
           {/* 8. Data Provenance */}
           {post.dataProvenance && (
-            <div className="my-6 flex items-start gap-3 px-4 py-3 rounded-lg border bg-muted/40 text-sm text-muted-foreground">
+            <div className="my-6 flex items-start gap-3 px-4 py-3 border border-border bg-background text-sm text-muted-foreground">
               <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mt-0.5 flex-shrink-0 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
               <span>{post.dataProvenance}</span>
             </div>
@@ -493,7 +509,7 @@ export default async function BlogArticlePage({ params }: Props) {
               <h2 className="text-2xl font-bold mb-6">Tools Compared</h2>
               <div className="grid md:grid-cols-2 gap-4">
                 {post.toolsCompared.map((item: any, i: number) => (
-                  <div key={i} className="border rounded-xl p-5 flex flex-col">
+                  <div key={i} className="border border-border p-5 flex flex-col">
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="font-bold text-lg">{item.tool?.name}</h3>
                       {item.rating && (
@@ -508,11 +524,11 @@ export default async function BlogArticlePage({ params }: Props) {
                     <div className="grid grid-cols-2 gap-4 text-sm flex-1">
                       {item.pros?.length > 0 && (
                         <div>
-                          <p className="font-semibold text-green-700 dark:text-green-400 mb-1.5">Pros</p>
+                          <p className="font-semibold text-primary mb-1.5">Pros</p>
                           <ul className="space-y-1">
                             {item.pros.map((pro: string, j: number) => (
                               <li key={j} className="text-muted-foreground flex items-start gap-1">
-                                <span className="text-green-600 mt-0.5">+</span> {pro}
+                                <span className="text-primary mt-0.5">+</span> {pro}
                               </li>
                             ))}
                           </ul>
@@ -520,11 +536,11 @@ export default async function BlogArticlePage({ params }: Props) {
                       )}
                       {item.cons?.length > 0 && (
                         <div>
-                          <p className="font-semibold text-red-700 dark:text-red-400 mb-1.5">Cons</p>
+                          <p className="font-semibold text-muted-foreground mb-1.5">Cons</p>
                           <ul className="space-y-1">
                             {item.cons.map((con: string, j: number) => (
                               <li key={j} className="text-muted-foreground flex items-start gap-1">
-                                <span className="text-red-600 mt-0.5">-</span> {con}
+                                <span className="text-muted-foreground mt-0.5">−</span> {con}
                               </li>
                             ))}
                           </ul>
@@ -542,7 +558,7 @@ export default async function BlogArticlePage({ params }: Props) {
                         href={item.affiliateLink}
                         target="_blank"
                         rel="nofollow noopener noreferrer sponsored"
-                        className="mt-4 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+                        className="mt-4 flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
                       >
                         Try {item.tool?.name}
                         <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />
@@ -592,8 +608,8 @@ export default async function BlogArticlePage({ params }: Props) {
               <h2 className="text-2xl font-bold mb-6">Frequently Asked Questions</h2>
               <div className="space-y-3">
                 {post.faqs.map((faq: any, i: number) => (
-                  <details key={i} className="border rounded-xl group" open={i === 0}>
-                    <summary className="flex items-center justify-between px-5 py-4 cursor-pointer font-semibold list-none hover:bg-secondary/50 transition-colors rounded-xl">
+                  <details key={i} className="border border-border group" open={i === 0}>
+                    <summary className="flex items-center justify-between px-5 py-4 cursor-pointer font-semibold list-none hover:bg-secondary/20 transition-colors">
                       <span>{faq.question}</span>
                       <ChevronRight className="w-4 h-4 ml-4 text-muted-foreground group-open:rotate-90 transition-transform flex-shrink-0" aria-hidden="true" />
                     </summary>
@@ -616,7 +632,7 @@ export default async function BlogArticlePage({ params }: Props) {
               <ul className="space-y-2">
                 {post.relatedResources.map((res: any, i: number) => (
                   <li key={i} className="flex items-start gap-3 text-sm">
-                    <span className="mt-0.5 px-2 py-0.5 rounded text-xs bg-secondary text-muted-foreground font-medium flex-shrink-0">
+                    <span className="mt-0.5 px-2 py-0.5 text-xs border border-border text-muted-foreground font-medium flex-shrink-0">
                       {RESOURCE_TYPE_LABELS[res.resourceType] || 'Link'}
                     </span>
                     <div>
@@ -664,9 +680,9 @@ export default async function BlogArticlePage({ params }: Props) {
           {/* 13. Author card */}
           {post.author && (
             <section className="mt-10 pt-8 border-t" aria-label="About the author">
-              <div className="flex items-start gap-4 p-6 rounded-xl bg-secondary/40 border">
+              <div className="flex items-start gap-4 p-6 border border-border">
                 {urlForImageSafe(post.author.image) && (
-                  <div className="w-14 h-14 rounded-full overflow-hidden bg-secondary flex-shrink-0 border-2 border-background shadow">
+                  <div className="w-14 h-14 overflow-hidden bg-white/10 flex-shrink-0 border border-border">
                     <Image
                       src={urlForImageSafe(post.author.image)!}
                       alt={post.author.name}
@@ -683,7 +699,7 @@ export default async function BlogArticlePage({ params }: Props) {
                       <span className="text-xs text-muted-foreground">{post.author.role}</span>
                     )}
                     {post.author.yearsOfExperience && (
-                      <span className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
+                      <span className="flex items-center gap-1 text-xs px-2 py-0.5 border border-border text-primary font-medium">
                         <ShieldCheck className="w-3 h-3" aria-hidden="true" />
                         {post.author.yearsOfExperience}+ yrs experience
                       </span>
@@ -695,7 +711,7 @@ export default async function BlogArticlePage({ params }: Props) {
                   {post.author.certifications?.length > 0 && (
                     <div className="flex flex-wrap gap-1.5">
                       {post.author.certifications.map((cert: string, i: number) => (
-                        <span key={i} className="text-xs px-2 py-0.5 rounded border bg-background">
+                        <span key={i} className="text-xs px-2 py-0.5 border border-border">
                           {cert}
                         </span>
                       ))}
@@ -739,7 +755,7 @@ export default async function BlogArticlePage({ params }: Props) {
                   <Link
                     key={article._id}
                     href={`/blog/${article.slug.current}`}
-                    className="border rounded-xl p-5 hover:border-primary hover:shadow-sm transition-all group"
+                    className="border border-border p-5 hover:border-primary/40 transition-colors group"
                   >
                     <div className="flex items-center gap-2 mb-2">
                       {article.categories?.[0] && (

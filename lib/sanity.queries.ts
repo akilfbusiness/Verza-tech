@@ -159,7 +159,8 @@ export async function getAllReviews(): Promise<Review[]> {
         _id,
         name,
         slug,
-        logo
+        logo,
+        tagline
       },
       author-> {
         ${authorFragment}
